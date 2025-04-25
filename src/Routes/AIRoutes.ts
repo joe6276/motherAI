@@ -1,6 +1,6 @@
 
 import express from "express"
-import { aiChat, sendandReply } from "../controllers/AIController"
+import { aiChat, getRecords, sendandReply } from "../controllers/AIController"
 
 
 const router = express.Router()
@@ -8,5 +8,6 @@ const router = express.Router()
 
 router.post("", aiChat)
 router.post('/webhook', sendandReply)
+router.get("/records", getRecords)
 
 export default router

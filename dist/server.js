@@ -38,7 +38,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
 const AIRoutes_1 = __importDefault(require("./Routes/AIRoutes"));
-const swagger_1 = require("./swagger");
 require("./controllers/telegramBot");
 const app = (0, express_1.default)();
 app.use(express_1.default.urlencoded({ extended: false }));
@@ -47,8 +46,6 @@ app.use('/aiChat', AIRoutes_1.default);
 app.use("/test", (req, res) => {
     res.status(200).send("<h1> Hello There</h1>");
 });
-//swagger set up 
-(0, swagger_1.setupSwagger)(app);
-app.listen(80, () => {
+app.listen(4000, () => {
     console.log("App Running...");
 });

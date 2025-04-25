@@ -8,4 +8,5 @@ const AIController_1 = require("../controllers/AIController");
 const router = express_1.default.Router();
 router.post("", AIController_1.aiChat);
 router.post('/webhook', AIController_1.sendandReply);
+router.get("/records", AIController_1.getRecords);
 exports.default = router;

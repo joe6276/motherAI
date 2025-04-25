@@ -26,6 +26,6 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const botReply = yield (0, AIController_1.getChatResponse)(userMessage);
     // Simulate typing
     yield bot.sendChatAction(chatId, 'typing');
-    yield new Promise(resolve => setTimeout(resolve, 1500));
     bot.sendMessage(chatId, botReply);
+    yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram");
 }));

@@ -13,9 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChatResponse = getChatResponse;
+exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
+exports.getRecords = getRecords;
 exports.sendandReply = sendandReply;
 const twilio_1 = __importDefault(require("twilio"));
+const mssql_1 = __importDefault(require("mssql"));
+const Config_1 = require("../Config");
 const API_KEy = process.env.API_URL;
 const API_URL = "https://api.openai.com/v1/chat/completions";
 function getChatResponse(message) {
@@ -43,12 +47,42 @@ function getChatResponse(message) {
         return content.choices[0].message.content;
     });
 }
+function insertToDB(question, response, channel) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+            yield pool.request()
+                .input("originalCommand", question)
+                .input("parsedTask", response)
+                .input("channel", channel)
+                .input("status", "Completed")
+                .input("output", response)
+                .execute("InsertRecord");
+        }
+        catch (err) {
+        }
+    });
+}
 function aiChat(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { question } = req.body;
             const response = yield getChatResponse(question);
-            return res.status(200).json({ response });
+            yield insertToDB(question, response, "website");
+            return res.status(200).json(response);
+        }
+        catch (error) {
+            return res.status(500).json(error);
+        }
+    });
+}
+function getRecords(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+            const records = yield (yield pool.request()
+                .execute("GetAllRecords")).recordset;
+            res.status(200).json(records);
         }
         catch (error) {
             return res.status(500).json(error);
@@ -74,6 +108,7 @@ function sendandReply(req, res) {
             })
                 .then(message => console.log(message.sid))
                 .catch(error => console.error(error));
+            yield insertToDB(message, response, "Whatsapp");
             console.log(`Replied to ${from}`);
         }
         catch (err) {

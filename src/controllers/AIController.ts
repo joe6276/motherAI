@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import twilio from 'twilio'
-
+import mssql from 'mssql'
+import { sqlConfig } from "../Config";
 
 const API_KEy = process.env.API_URL as string
 const API_URL = "https://api.openai.com/v1/chat/completions"
@@ -37,18 +38,46 @@ export async function  getChatResponse( message:string){
     return content.choices[0].message.content
 }
 
+export async function  insertToDB(question:string, response:string, channel:string){
+    try{
+        const pool = await mssql.connect(sqlConfig);
+        await pool.request()
+        .input("originalCommand", question)      
+        .input("parsedTask", response)            
+        .input("channel", channel)             
+        .input("status", "Completed")            
+        .input("output", response)                
+        .execute("InsertRecord");
+    }catch(err){
+
+    }
+}
 
 export async function aiChat(req: Request, res: Response) {
     try {
         const {question}= req.body
-        const response = await getChatResponse(question)
-        return res.status(200).json({response})
 
+        const response = await getChatResponse(question)
+        
+        await insertToDB(question,response, "website")
+        return res.status(200).json(response)
     } catch (error) {
         return res.status(500).json(error)
     }
 }
 
+
+export async function getRecords( req:Request, res:Response){
+    try{
+        const pool =await mssql.connect(sqlConfig)
+        const records=await(await pool.request()
+        .execute("GetAllRecords")).recordset
+
+        res.status(200).json(records)
+    }catch(error){
+        return res.status(500).json(error)
+    }
+}
 
 export async function sendandReply(req: Request, res: Response) {
 
@@ -71,7 +100,7 @@ export async function sendandReply(req: Request, res: Response) {
         })
         .then(message => console.log(message.sid))
         .catch(error => console.error(error));
-        
+        await insertToDB(message,response, "Whatsapp")
         console.log(`Replied to ${from}`);
     } catch (err) {
         console.error('Error sending reply:', err);
