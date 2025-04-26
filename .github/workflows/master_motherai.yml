@@ -1,27 +1,30 @@
 name: Deploy to Azure App Service
-
 on:
-  push: 
-    branches: 
+  push:
+    branches:
       - master
-
-jobs: 
+jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
         uses: actions/checkout@v3
+      
       - name: Setup Node.js version
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: 20
+      
       - name: Install Dependencies
         run: npm install
+      
+      - name: Build TypeScript
+        run: npm run build
+        # Assuming you have a build script in package.json that compiles TS to JS
+      
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
           app-name: motheai
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .       
-
-              
+          package: .
