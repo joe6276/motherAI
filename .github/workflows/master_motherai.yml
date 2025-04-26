@@ -18,10 +18,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
       
-      - name: Build TypeScript
-        run: npm run build
-        # Assuming you have a build script in package.json that compiles TS to JS
-      
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
