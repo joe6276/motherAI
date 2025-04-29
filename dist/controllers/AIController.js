@@ -22,7 +22,7 @@ const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
 const API_KEy = process.env.API_URL;
 const API_URL = "https://api.openai.com/v1/chat/completions";
-function getChatResponse(message) {
+function getChatResponse(message, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const messages = [{
                 role: 'system', content: `
@@ -30,6 +30,15 @@ function getChatResponse(message) {
     `
             }];
         messages.push({ role: "user", content: message });
+        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        const history = yield (yield pool.request().input("UserId", userId).execute("GetUserRecords")).recordset;
+        if (history.length) {
+            history.forEach(element => {
+                messages.push({ role: "user", content: element.originalCommand });
+                messages.push({ role: "assistant", content: element.output });
+            });
+            console.log(messages);
+        }
         const response = yield fetch(API_URL, {
             method: "POST",
             headers: {
@@ -43,11 +52,10 @@ function getChatResponse(message) {
             })
         });
         const content = yield response.json();
-        messages.push({ role: 'assistant', content: content.choices[0].message.content });
         return content.choices[0].message.content;
     });
 }
-function insertToDB(question, response, channel) {
+function insertToDB(question, response, channel, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
@@ -56,6 +64,7 @@ function insertToDB(question, response, channel) {
                 .input("parsedTask", response)
                 .input("channel", channel)
                 .input("status", "Completed")
+                .input("UserId", userId)
                 .input("output", response)
                 .execute("InsertRecord");
         }
@@ -66,9 +75,9 @@ function insertToDB(question, response, channel) {
 function aiChat(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { question } = req.body;
-            const response = yield getChatResponse(question);
-            yield insertToDB(question, response, "website");
+            const { question, userId } = req.body;
+            const response = yield getChatResponse(question, userId);
+            yield insertToDB(question, response, "website", userId);
             return res.status(200).json(response);
         }
         catch (error) {
@@ -99,7 +108,7 @@ function sendandReply(req, res) {
         const Auth_TOKEN = process.env.AUTH_TOKEN;
         const client = (0, twilio_1.default)(Account_SID, Auth_TOKEN);
         try {
-            const response = yield getChatResponse(message);
+            const response = yield getChatResponse(message, req.body.From);
             client.messages
                 .create({
                 from: req.body.To, // Twilio Sandbox Number
@@ -108,7 +117,7 @@ function sendandReply(req, res) {
             })
                 .then(message => console.log(message.sid))
                 .catch(error => console.error(error));
-            yield insertToDB(message, response, "Whatsapp");
+            yield insertToDB(message, response, "Whatsapp", req.body.from);
             console.log(`Replied to ${from}`);
         }
         catch (err) {

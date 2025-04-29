@@ -11,13 +11,26 @@ interface Users {
     content: string
 }
 
-export async function  getChatResponse( message:string){
+export async function  getChatResponse( message:string, userId:number){
     const messages: Users[] = [{
         role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
     `}]
 
     messages.push({ role: "user", content: message })
+    const pool = await mssql.connect(sqlConfig)
+    const history= await(await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset 
+
+   if(history.length){
+    history.forEach(element => {
+        messages.push({role:"user", content:element.originalCommand})
+        messages.push({role:"assistant", content:element.output})
+       
+    });
+
+    console.log(messages);
+    
+   }
     const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -33,19 +46,18 @@ export async function  getChatResponse( message:string){
 
     })
     const content = await response.json()
-    messages.push({ role: 'assistant', content: content.choices[0].message.content })
-
     return content.choices[0].message.content
 }
 
-export async function  insertToDB(question:string, response:string, channel:string){
+export async function  insertToDB(question:string, response:string, channel:string, userId:string){
     try{
         const pool = await mssql.connect(sqlConfig);
         await pool.request()
         .input("originalCommand", question)      
         .input("parsedTask", response)            
         .input("channel", channel)             
-        .input("status", "Completed")            
+        .input("status", "Completed")  
+        .input("UserId", userId)          
         .input("output", response)                
         .execute("InsertRecord");
     }catch(err){
@@ -55,11 +67,11 @@ export async function  insertToDB(question:string, response:string, channel:stri
 
 export async function aiChat(req: Request, res: Response) {
     try {
-        const {question}= req.body
+        const {question, userId}= req.body
 
-        const response = await getChatResponse(question)
+        const response = await getChatResponse(question, userId)
         
-        await insertToDB(question,response, "website")
+        await insertToDB(question,response, "website",userId)
         return res.status(200).json(response)
     } catch (error) {
         return res.status(500).json(error)
@@ -90,7 +102,7 @@ export async function sendandReply(req: Request, res: Response) {
     const client = twilio(Account_SID, Auth_TOKEN)
     try {
 
-        const response = await getChatResponse(message)
+        const response = await getChatResponse(message,req.body.From)
 
         client.messages
         .create({
@@ -100,7 +112,7 @@ export async function sendandReply(req: Request, res: Response) {
         })
         .then(message => console.log(message.sid))
         .catch(error => console.error(error));
-        await insertToDB(message,response, "Whatsapp")
+        await insertToDB(message,response, "Whatsapp",req.body.from)
         console.log(`Replied to ${from}`);
     } catch (err) {
         console.error('Error sending reply:', err);

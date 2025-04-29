@@ -1,12 +1,11 @@
 {
   "name": "motherai",
   "version": "1.0.0",
-  "main":"dist/server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "build": "tsc"  ,
+   "build": "tsc"  ,
     "start:build": "tsc -w",
-    "start:run": "nodemon dist/server.js",
-    "start": "node dist/server.js"
+    "start": "nodemon dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -16,10 +15,12 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/mssql": "^9.1.7",
+    "bcrypt": "^5.1.1",
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mssql": "^11.0.1",
     "node-telegram-bot-api": "^0.66.0",
     "nodemon": "^3.1.10",
@@ -28,6 +29,8 @@
     "twilio": "^5.5.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node-telegram-bot-api": "^0.64.8",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8"
