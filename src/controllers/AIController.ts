@@ -94,16 +94,16 @@ export async function getRecords( req:Request, res:Response){
 
 export async function sendandReply(req: Request, res: Response) {
 
-    console.log(req.body)
-    const from = 'whatsapp:+254769921156';
+
+    const from = req.body.From;
     const message = req.body.Body;
-    console.log(req.body);
+  
     const Account_SID = process.env.ACCOUNT_SID as string
     const Auth_TOKEN = process.env.AUTH_TOKEN as string
     const client = twilio(Account_SID, Auth_TOKEN)
     try {
 
-        const response = await getChatResponse(message,req.body.From)
+        const response = await getChatResponse(message,23)
 
         client.messages
         .create({
