@@ -97,6 +97,7 @@ export async function sendandReply(req: Request, res: Response) {
 
     const from = req.body.From;
     const message = req.body.Body;
+  console.log(message);
   
     const Account_SID = process.env.ACCOUNT_SID as string
     const Auth_TOKEN = process.env.AUTH_TOKEN as string

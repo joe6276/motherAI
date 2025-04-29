@@ -16,7 +16,7 @@ exports.createAdmin = createAdmin;
 exports.addUser = addUser;
 exports.loginUser = loginUser;
 const mssql_1 = __importDefault(require("mssql"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const Config_1 = require("../Config");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -26,7 +26,7 @@ function createAdmin(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { firstName, lastName, email, password, companyId } = req.body;
-            const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+            const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
             const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
             const user = yield (yield pool.request()
                 .input("Email", email)
@@ -53,7 +53,7 @@ function addUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { firstName, lastName, email, password, companyId } = req.body;
-            const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+            const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
             const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
             const user = yield (yield pool.request()
                 .input("Email", email)
@@ -85,7 +85,7 @@ function loginUser(req, res) {
             const user = yield (yield pool.request()
                 .input("Email", email)
                 .execute("getUserByEmail")).recordset;
-            const isValid = yield bcrypt_1.default.compare(password, user[0].Password);
+            const isValid = yield bcryptjs_1.default.compare(password, user[0].Password);
             if (!isValid || user.length == 0) {
                 return res.status(400).json({ message: "Invalid Credentials" });
             }
