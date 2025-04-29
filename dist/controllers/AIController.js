@@ -117,7 +117,7 @@ function sendandReply(req, res) {
             })
                 .then(message => console.log(message.sid))
                 .catch(error => console.error(error));
-            yield insertToDB(message, response, "Whatsapp", req.body.from);
+            yield insertToDB(message, response, "Whatsapp", number);
             console.log(`Replied to ${from}`);
         }
         catch (err) {

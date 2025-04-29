@@ -117,7 +117,7 @@ export async function sendandReply(req: Request, res: Response) {
         })
         .then(message => console.log(message.sid))
         .catch(error => console.error(error));
-        await insertToDB(message,response, "Whatsapp",req.body.from)
+        await insertToDB(message,response, "Whatsapp",number)
         console.log(`Replied to ${from}`);
     } catch (err) {
         console.error('Error sending reply:', err);
