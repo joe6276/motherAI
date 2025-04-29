@@ -96,16 +96,14 @@ export async function sendandReply(req: Request, res: Response) {
 
 
     const from = req.body.From;
-    const message = req.body.Body;
-  console.log(req.body);
-  
+    const message = req.body.Body;  
     const Account_SID = process.env.ACCOUNT_SID as string
     const Auth_TOKEN = process.env.AUTH_TOKEN as string
     const client = twilio(Account_SID, Auth_TOKEN)
     try {
 
         const number= from.split("+")[1]
-        console.log(number);
+     
         
         const response = await getChatResponse(message,number)
 

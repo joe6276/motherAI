@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
 const AIRoutes_1 = __importDefault(require("./Routes/AIRoutes"));
-// import './controllers/telegramBot'
+require("./controllers/telegramBot");
 const cors_1 = __importDefault(require("cors"));
 const companyRoutes_1 = __importDefault(require("./Routes/companyRoutes"));
 const userRoutes_1 = __importDefault(require("./Routes/userRoutes"));
