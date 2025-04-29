@@ -23,9 +23,9 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const chatId = msg.chat.id;
     const userMessage = msg.text;
     // Call your GPT API or custom logic here
-    const botReply = yield (0, AIController_1.getChatResponse)(userMessage);
+    const botReply = yield (0, AIController_1.getChatResponse)(userMessage, "tel");
     // Simulate typing
     yield bot.sendChatAction(chatId, 'typing');
     bot.sendMessage(chatId, botReply);
-    yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram");
+    yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", "tel");
 }));

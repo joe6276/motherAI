@@ -13,12 +13,12 @@ bot.on('message', async (msg) => {
     const userMessage = msg.text as string;
   
     // Call your GPT API or custom logic here
-    const botReply = await getChatResponse(userMessage);
+    const botReply = await getChatResponse(userMessage,msg.from?.username as string);
   
     // Simulate typing
     await bot.sendChatAction(chatId, 'typing');
    
     bot.sendMessage(chatId, botReply);
 
-    await insertToDB(userMessage,botReply, "Telegram")
+    await insertToDB(userMessage,botReply, "Telegram",msg.from?.username as string)
 })
