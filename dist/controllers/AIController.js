@@ -29,7 +29,6 @@ function getChatResponse(message, userId) {
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
     `
             }];
-        messages.push({ role: "user", content: message });
         const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
         const history = yield (yield pool.request().input("UserId", userId).execute("GetUserRecords")).recordset;
         if (history.length) {
@@ -37,8 +36,8 @@ function getChatResponse(message, userId) {
                 messages.push({ role: "user", content: element.originalCommand });
                 messages.push({ role: "assistant", content: element.output });
             });
-            console.log(messages);
         }
+        messages.push({ role: "user", content: message });
         const response = yield fetch(API_URL, {
             method: "POST",
             headers: {

@@ -17,7 +17,7 @@ export async function  getChatResponse( message:string, userId:number){
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
     `}]
 
-    messages.push({ role: "user", content: message })
+
     const pool = await mssql.connect(sqlConfig)
     const history= await(await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset 
 
@@ -27,10 +27,11 @@ export async function  getChatResponse( message:string, userId:number){
         messages.push({role:"assistant", content:element.output})
        
     });
-
-    console.log(messages);
-    
    }
+
+   messages.push({ role: "user", content: message })
+
+
     const response = await fetch(API_URL, {
         method: "POST",
         headers: {
