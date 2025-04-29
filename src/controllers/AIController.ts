@@ -104,7 +104,10 @@ export async function sendandReply(req: Request, res: Response) {
     const client = twilio(Account_SID, Auth_TOKEN)
     try {
 
-        const response = await getChatResponse(message,from)
+        const number= from.split("+")[1]
+        console.log(number);
+        
+        const response = await getChatResponse(message,number)
 
         client.messages
         .create({

@@ -34,16 +34,16 @@ END;
 
 
 
-CREATE PROCEDURE GetAllRecords
+CREATE OR ALTER PROCEDURE GetAllRecords
 AS
 BEGIN
-    SELECT Id, originalCommand, parsedTask, status, output, Timestamp
+    SELECT *
     FROM Records;
 END;
 
 
 
-CREATE OR ALTER PROCEDURE GetUserRecords(@UserId INT)
+CREATE OR ALTER PROCEDURE GetUserRecords(@UserId VARCHAR(200))
 AS
 BEGIN
     SELECT *  FROM Records WHERE UserId = @UserId;
