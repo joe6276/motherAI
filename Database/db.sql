@@ -13,7 +13,7 @@ CREATE TABLE Records (
     parsedTask TEXT,
     channel VARCHAR(200),
     status VARCHAR(200),
-    UserId INT,
+    UserId VARCHAR(200),
     output TEXT,
     Timestamp DATETIME DEFAULT GETDATE()
 );
@@ -24,7 +24,7 @@ CREATE OR ALTER PROCEDURE InsertRecord
     @channel VARCHAR(200),
     @status VARCHAR(200),
     @output TEXT,
-    @UserId INT
+    @UserId VARCHAR(200)
 AS
 BEGIN
     INSERT INTO Records (originalCommand, parsedTask, channel, status, output,UserId)

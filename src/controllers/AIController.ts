@@ -11,7 +11,7 @@ interface Users {
     content: string
 }
 
-export async function  getChatResponse( message:string, userId:number){
+export async function  getChatResponse( message:string, userId:string){
     const messages: Users[] = [{
         role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
