@@ -101,12 +101,12 @@ function sendandReply(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const from = req.body.From;
         const message = req.body.Body;
-        console.log(message);
+        console.log(req.body);
         const Account_SID = process.env.ACCOUNT_SID;
         const Auth_TOKEN = process.env.AUTH_TOKEN;
         const client = (0, twilio_1.default)(Account_SID, Auth_TOKEN);
         try {
-            const response = yield getChatResponse(message, 23);
+            const response = yield getChatResponse(message, from);
             client.messages
                 .create({
                 from: req.body.To, // Twilio Sandbox Number
