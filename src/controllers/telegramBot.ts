@@ -8,7 +8,7 @@ import { getChatResponse, insertToDB } from './AIController';
 const bot = new TelegramBot(process.env.TElEGRAM as string, { polling: true });
 
 bot.on('message', async (msg) => {
-    console.log(msg)
+    // console.log(msg)
     const chatId = msg.chat.id;
     const userMessage = msg.text as string;
   

@@ -19,13 +19,14 @@ const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api")
 const AIController_1 = require("./AIController");
 const bot = new node_telegram_bot_api_1.default(process.env.TElEGRAM, { polling: true });
 bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(msg);
+    var _a, _b;
+    // console.log(msg)
     const chatId = msg.chat.id;
     const userMessage = msg.text;
     // Call your GPT API or custom logic here
-    const botReply = yield (0, AIController_1.getChatResponse)(userMessage, "tel");
+    const botReply = yield (0, AIController_1.getChatResponse)(userMessage, (_a = msg.from) === null || _a === void 0 ? void 0 : _a.username);
     // Simulate typing
     yield bot.sendChatAction(chatId, 'typing');
     bot.sendMessage(chatId, botReply);
-    yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", "tel");
+    yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", (_b = msg.from) === null || _b === void 0 ? void 0 : _b.username);
 }));
