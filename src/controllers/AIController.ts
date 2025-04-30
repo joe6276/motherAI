@@ -238,7 +238,7 @@ export async function sendandReply(req: Request, res: Response) {
             }
         } else {
             // Step 4: Already authenticated
-            const response = await getChatResponse(message, from);
+            const response = await getChatResponse1(message, from);
             responseMessage = response;
         }
 
