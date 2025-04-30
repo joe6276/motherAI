@@ -39,7 +39,7 @@ export async function  getChatResponse( message:string, userId:string){
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4-turbo',
             messages,
             temperature: 0.9 //0-2
         })
@@ -96,14 +96,16 @@ export async function sendandReply(req: Request, res: Response) {
 
 
     const from = req.body.From;
-    const message = req.body.Body;  
+    const message = req.body.Body;
+  console.log(req.body);
+  
     const Account_SID = process.env.ACCOUNT_SID as string
     const Auth_TOKEN = process.env.AUTH_TOKEN as string
     const client = twilio(Account_SID, Auth_TOKEN)
     try {
 
         const number= from.split("+")[1]
-     
+        console.log(number);
         
         const response = await getChatResponse(message,number)
 

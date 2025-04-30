@@ -91,7 +91,7 @@ function loginUser(req, res) {
             }
             else {
                 const token = jsonwebtoken_1.default.sign({ id: user[0].Id, role: user[0].Role }, process.env.SECRET);
-                return res.status(200).json({ message: "Login Successful", token });
+                return res.status(200).json({ message: "Login Successful", token, id: user[0].Id });
             }
         }
         catch (error) {

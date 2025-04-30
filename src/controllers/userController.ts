@@ -80,7 +80,7 @@ export async function loginUser(req:Request, res:Response){
             return res.status(400).json({message:"Invalid Credentials"})
         }else{
             const token = jwt.sign({id:user[0].Id, role:user[0].Role},process.env.SECRET as string)
-            return res.status(200).json({message:"Login Successful", token})
+            return res.status(200).json({message:"Login Successful", token, id:user[0].Id})
         }
     
 

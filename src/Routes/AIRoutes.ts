@@ -7,7 +7,7 @@ import { tokenRequired } from "../middleWares/tokenRequired"
 const router = express.Router()
 
 
-router.post("", tokenRequired, aiChat)
+router.post("",  aiChat)
 router.post('/webhook', sendandReply)
 router.get("/records", getRecords)
 
