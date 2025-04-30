@@ -30,3 +30,53 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     bot.sendMessage(chatId, botReply);
     yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", (_a = msg.from) === null || _a === void 0 ? void 0 : _a.username);
 }));
+const loginSteps = new Map();
+bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const chatId = msg.chat.id;
+    const userMessage = (_a = msg.text) === null || _a === void 0 ? void 0 : _a.trim();
+    const username = ((_b = msg.from) === null || _b === void 0 ? void 0 : _b.username) || chatId.toString();
+    let responseMessage = "";
+    try {
+        const session = loginSteps.get(chatId) || { step: 1, temp: {} };
+        if (session.step === 1) {
+            responseMessage = "👋 Welcome! Please enter your email to log in.";
+            session.step = 2;
+            loginSteps.set(chatId, session);
+        }
+        else if (session.step === 2) {
+            session.temp.email = userMessage;
+            session.step = 3;
+            loginSteps.set(chatId, session);
+            responseMessage = "🔐 Now enter your password.";
+        }
+        else if (session.step === 3) {
+            const { email } = session.temp;
+            const password = userMessage;
+            const isloginValid = yield (0, AIController_1.loginUserBot)(email, password);
+            if (isloginValid) {
+                session.step = 4;
+                loginSteps.set(chatId, session);
+                responseMessage = `✅ Login successful, ${email}. You can now chat with the bot.`;
+            }
+            else {
+                loginSteps.delete(chatId);
+                responseMessage = "❌ Invalid credentials. Please enter your email again to start over.";
+            }
+        }
+        else {
+            // Authenticated: Chatbot mode
+            yield bot.sendChatAction(chatId, 'typing');
+            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage);
+            responseMessage = botReply;
+            // Store conversation
+            yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
+        }
+        // Send response
+        yield bot.sendMessage(chatId, responseMessage);
+    }
+    catch (error) {
+        console.error("Error in Telegram bot:", error);
+        yield bot.sendMessage(chatId, "⚠️ Something went wrong. Please try again.");
+    }
+}));

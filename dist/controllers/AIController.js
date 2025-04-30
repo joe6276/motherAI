@@ -18,7 +18,7 @@ exports.getChatResponse1 = getChatResponse1;
 exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
 exports.getRecords = getRecords;
-exports.loginUser = loginUser;
+exports.loginUserBot = loginUserBot;
 exports.sendandReply = sendandReply;
 const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
@@ -172,7 +172,7 @@ function getRecords(req, res) {
         }
     });
 }
-function loginUser(email, password) {
+function loginUserBot(email, password) {
     return __awaiter(this, void 0, void 0, function* () {
         const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
         const user = yield (yield pool.request()
@@ -212,7 +212,7 @@ function sendandReply(req, res) {
             else if (session.step === 3) {
                 const { email } = session.temp;
                 const password = message;
-                const isLoginValid = yield loginUser(email, password);
+                const isLoginValid = yield loginUserBot(email, password);
                 if (isLoginValid) {
                     loginSteps.set(from, { step: 4, temp: { email } });
                     responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;

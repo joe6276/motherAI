@@ -185,7 +185,7 @@ export async function getRecords(req: Request, res: Response) {
     }
 }
 
-export async function loginUser(email:string, password:string){    
+export async function loginUserBot(email:string, password:string){    
         const pool = await mssql.connect(sqlConfig)
         const user =await(await pool.request()
         .input("Email", email)
@@ -227,7 +227,7 @@ export async function sendandReply(req: Request, res: Response) {
             const { email } = session.temp;
             const password = message;
 
-            const isLoginValid= await loginUser(email,password)
+            const isLoginValid= await loginUserBot(email,password)
 
             if (isLoginValid) {
                 loginSteps.set(from, { step: 4, temp: { email } });
