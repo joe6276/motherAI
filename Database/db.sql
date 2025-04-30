@@ -55,6 +55,7 @@ CREATE TABLE Company (
     CompanyName VARCHAR(255) NOT NULL
 );
 
+DROp TABLE Users
 -- Create the Users table
 CREATE TABLE Users (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -64,10 +65,13 @@ CREATE TABLE Users (
     Password VARCHAR(255) NOT NULL,
     Role VARCHAR(50) DEFAULT 'Employee',
     CompanyId INT,
+    Occupation VARCHAR()
     CreatedAt DATETIME DEFAULT GETDATE(),
-
     FOREIGN KEY (CompanyId) REFERENCES Company(Id)
 );
+
+ALTER TABLE Users
+ADD Occupation VARCHAR(200);
 
 
 CREATE PROCEDURE AddCompany
@@ -87,17 +91,18 @@ END
 
 
 
-CREATE PROCEDURE AddUser
+CREATE OR ALTER PROCEDURE AddUser
     @FirstName VARCHAR(100),
     @LastName VARCHAR(100),
     @Email VARCHAR(255),
     @Password VARCHAR(255),
     @Role VARCHAR(50),
-    @CompanyId INT
+    @CompanyId INT,
+    @Occupation VARCHAR(200)
 AS
 BEGIN
-    INSERT INTO Users (FirstName, LastName, Email, Password, Role, CompanyId)
-    VALUES (@FirstName, @LastName, @Email, @Password, @Role, @CompanyId);
+    INSERT INTO Users (FirstName, LastName, Email, Password, Role, CompanyId, Occupation)
+    VALUES (@FirstName, @LastName, @Email, @Password, @Role, @CompanyId, @Occupation);
 END
 
 
@@ -126,14 +131,15 @@ BEGIN
 END
 
 
-CREATE PROCEDURE UpdateUser
+CREATE OR ALTER PROCEDURE UpdateUser
     @UserId INT,
     @FirstName VARCHAR(100),
     @LastName VARCHAR(100),
     @Email VARCHAR(255),
     @Password VARCHAR(255),
     @Role VARCHAR(50),
-    @CompanyId INT
+    @CompanyId INT,
+    @Occupation VARCHAR(200)
 AS
 BEGIN
     UPDATE Users
@@ -143,7 +149,9 @@ BEGIN
         Email = @Email,
         Password = @Password,
         Role = @Role,
-        CompanyId = @CompanyId
+        CompanyId = @CompanyId,
+        Occupation=@Occupation
+
     WHERE Id = @UserId;
 END
 
