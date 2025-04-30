@@ -227,6 +227,7 @@ function sendandReply(req, res) {
             }
             else {
                 // Step 4: Already authenticated
+                console.log("here", result);
                 const response = yield getChatResponse1(message, from, result.occupation);
                 responseMessage = response;
             }

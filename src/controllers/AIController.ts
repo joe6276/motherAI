@@ -240,7 +240,8 @@ export async function sendandReply(req: Request, res: Response) {
             }
         } else {
             // Step 4: Already authenticated
-            const response = await getChatResponse1(message, from, result!.occupation as string);
+            console.log("here" ,result);
+            const response = await getChatResponse1(message, from,   result!.occupation as string);
             responseMessage = response;
         }
 
