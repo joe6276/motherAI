@@ -29,6 +29,7 @@
     "twilio": "^5.5.2"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node-telegram-bot-api": "^0.64.8",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8"
