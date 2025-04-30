@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "scripts": {
-   "build": "tsc",
-    "start:build": "tsc -w",
+"start:build": "tsc -w",
     "start:run": "nodemon dist/server.js",
-    "start": "node dist/server.js"
+    "start": "concurrently npm:start:*"
   },
   "keywords": [],
   "author": "",

@@ -12,9 +12,9 @@ interface Users {
     content: string
 }
 
-export async function  getChatResponse( message:string, userId:string){
+export async function getChatResponse(message: string, userId: string) {
     const pool = await mssql.connect(sqlConfig)
-    const occupation= await(await pool.request().input("Id", userId).execute("getUserById")).recordset 
+    const occupation = await (await pool.request().input("Id", userId).execute("getUserById")).recordset
 
     const messages: Users[] = [{
         role: 'system', content: `
@@ -23,19 +23,19 @@ export async function  getChatResponse( message:string, userId:string){
     `}]
 
     console.log(messages);
-    
 
-    const history= await(await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset 
 
-   if(history.length){
-    history.forEach(element => {
-        messages.push({role:"user", content:element.originalCommand})
-        messages.push({role:"assistant", content:element.output})
-       
-    });
-   }
+    const history = await (await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset
 
-   messages.push({ role: "user", content: message })
+    if (history.length) {
+        history.forEach(element => {
+            messages.push({ role: "user", content: element.originalCommand })
+            messages.push({ role: "assistant", content: element.output })
+
+        });
+    }
+
+    messages.push({ role: "user", content: message })
 
 
     const response = await fetch(API_URL, {
@@ -56,29 +56,29 @@ export async function  getChatResponse( message:string, userId:string){
     return content.choices[0].message.content
 }
 
-export async function  insertToDB(question:string, response:string, channel:string, userId:string){
-    try{
+export async function insertToDB(question: string, response: string, channel: string, userId: string) {
+    try {
         const pool = await mssql.connect(sqlConfig);
         await pool.request()
-        .input("originalCommand", question)      
-        .input("parsedTask", response)            
-        .input("channel", channel)             
-        .input("status", "Completed")  
-        .input("UserId", userId)          
-        .input("output", response)                
-        .execute("InsertRecord");
-    }catch(err){
+            .input("originalCommand", question)
+            .input("parsedTask", response)
+            .input("channel", channel)
+            .input("status", "Completed")
+            .input("UserId", userId)
+            .input("output", response)
+            .execute("InsertRecord");
+    } catch (err) {
 
     }
 }
 
 export async function aiChat(req: Request, res: Response) {
     try {
-        const {question, userId}= req.body
+        const { question, userId } = req.body
 
         const response = await getChatResponse(question, userId)
-        
-        await insertToDB(question,response, "website",userId)
+
+        await insertToDB(question, response, "website", userId)
         return res.status(200).json(response)
     } catch (error) {
         return res.status(500).json(error)
@@ -86,21 +86,21 @@ export async function aiChat(req: Request, res: Response) {
 }
 
 
-export async function getRecords( req:Request, res:Response){
-    try{
-        const pool =await mssql.connect(sqlConfig)
-        const records=await(await pool.request()
-        .execute("GetAllRecords")).recordset
+export async function getRecords(req: Request, res: Response) {
+    try {
+        const pool = await mssql.connect(sqlConfig)
+        const records = await (await pool.request()
+            .execute("GetAllRecords")).recordset
 
         res.status(200).json(records)
-    }catch(error){
+    } catch (error) {
         return res.status(500).json(error)
     }
 }
 
 
 // async function loginWhatsapp(req: Request, res: Response){
-    
+
 //     let object={
 //         email:"",
 //         password:""
@@ -121,7 +121,7 @@ export async function getRecords( req:Request, res:Response){
 //              object.email= 
 //         }
 //     } catch (error) {
-        
+
 //     }
 // }
 // export async function sendandReply(to:string, from:string , message:string) {
@@ -132,7 +132,7 @@ export async function getRecords( req:Request, res:Response){
 
 //         // const number= from.split("+")[1]
 //         // console.log(number);
-        
+
 //         // const response = await getChatResponse(message,number)
 
 //         client.messages
@@ -144,7 +144,7 @@ export async function getRecords( req:Request, res:Response){
 //         .then(message => console.log(message.sid))
 //         .catch(error => console.error(error));
 //         // await insertToDB(message,response, "Whatsapp",number)
-       
+
 //     } catch (err) {
 //         console.error('Error sending reply:', err);
 //     }
@@ -152,23 +152,23 @@ export async function getRecords( req:Request, res:Response){
 
 // }
 
-export async function loginUser(email:string, password:string){
+export async function loginUser(email: string, password: string) {
 
-      
-        ///Geneerate TOken
-        const pool = await mssql.connect(sqlConfig)
-        const user =await(await pool.request()
+
+    ///Geneerate TOken
+    const pool = await mssql.connect(sqlConfig)
+    const user = await (await pool.request()
         .input("Email", email)
         .execute("getUserByEmail")).recordset as User[]
-       
-        const isValid =  await bcrypt.compare(password, user[0].Password)
-       
-        if( !isValid || user.length==0){
-            return false
-        }else{
-         return true;
-        }
-    
+
+    const isValid = await bcrypt.compare(password, user[0].Password)
+
+    if (!isValid || user.length == 0) {
+        return false
+    } else {
+        return true;
+    }
+
 }
 
 
@@ -178,7 +178,7 @@ export async function sendandReply(req: Request, res: Response) {
     const from = req.body.From;
     const message = req.body.Body;
   console.log(req.body);
-  
+
     const Account_SID = process.env.ACCOUNT_SID as string
     const Auth_TOKEN = process.env.AUTH_TOKEN as string
     const client = twilio(Account_SID, Auth_TOKEN)
@@ -186,13 +186,13 @@ export async function sendandReply(req: Request, res: Response) {
 
         const number= from.split("+")[1]
         console.log(number);
-        
+
         const response = await getChatResponse(message,number)
 
         client.messages
         .create({
-            from: req.body.To, // Twilio Sandbox Number
-            to: req.body.From,  // Your verified number
+            from: req.body.To, 
+            to: req.body.From, 
             body:response,
         })
         .then(message => console.log(message.sid))
@@ -202,92 +202,75 @@ export async function sendandReply(req: Request, res: Response) {
     } catch (err) {
         console.error('Error sending reply:', err);
     }
-
-    // ✅ Twilio still expects an XML response even if you send the reply via API
     res.send('<Response></Response>');
 }
+interface AuthState {
+    email?: string;
+    authenticated: boolean;
+    state: 'INIT' | 'AWAITING_EMAIL' | 'AWAITING_PASSWORD' | 'AUTHENTICATED';
+}
+const userSessions = new Map<string, AuthState>();
 
-// const loginSteps = new Map<string, { step: number, temp: any }>();
+const SESSION_TIMEOUT = 60 * 60 * 1000;
 
-// export async function sendandReply(req: Request, res: Response) {
-//     const from = req.body.From;         // WhatsApp number
-//     const to = req.body.To;             // Twilio number
-//     const message = req.body.Body?.trim().toLowerCase(); // Convert to lowercase for easier matching
-//     const now = new Date();
+async function validateUserSession(username: string): Promise<boolean> {
+    try {
+        const pool = await mssql.connect(sqlConfig)
+
+        const result = await pool.request()
+            .input('Username', username)
+            .execute("GetUserSessionByUsername")
+
+        if (result.recordset.length === 0) {
+            return false;
+        }
+
+        const createdAt = new Date(result.recordset[0].CreatedAt);
+        const currentTime = new Date();
+        const timeDiff = currentTime.getTime() - createdAt.getTime();
+
+        return timeDiff < SESSION_TIMEOUT;
+    } catch (err) {
+        console.error('Database error while validating session:', err);
+        return false;
+    }
+}
+
+
+
+
+function createNewAuthState(number: string): AuthState {
+    return {
+        authenticated: false,
+        state: 'INIT',
+    };
+}
+
+// export async function sendAndReply(req: Request, res: Response) {
+//     const from = req.body.From;
+//     const message = req.body.Body;
+//     console.log(req.body);
 
 //     const Account_SID = process.env.ACCOUNT_SID as string;
 //     const Auth_TOKEN = process.env.AUTH_TOKEN as string;
 //     const client = twilio(Account_SID, Auth_TOKEN);
 
-//     const pool = await mssql.connect(sqlConfig);
-//     let responseMessage = "";
-
-//     // Check if the message is a greeting (e.g., "hello", "hi", etc.)
-//     const greetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon"];
-//     const isGreeting = greetings.some(greet => message.includes(greet));
-
 //     try {
-//         // 1. Check if user has an active session (based on phone number)
-//         const sessionCheck = await (await pool.request()
-//             .input("Username", from)
-//             .execute("GetAllRecords")).recordset;
-//             console.log(sessionCheck);
-            
-//         const sessionValid = sessionCheck.length > 0 &&
-//             now < new Date(sessionCheck[0].CreatedAt.getTime() + 60 * 60 * 1000);
+//         const number = from.split("+")[1];
+//         console.log(number);
 
-//         if (sessionValid) {
-//             // ✅ Already logged in — get chatbot response
-//             const response = await getChatResponse(message, from);
-//             responseMessage = response;
+//         let responseText = '';
+
+//         const isValidSession = await validateUserSession(number);
+
+
+//         if (isValidSession) {
+
 //         } else {
-//             // ❌ Not logged in — start login process
-//             const session = loginSteps.get(from) || { step: 1, temp: {} };
 
-//             // Start the login process if the user is not logged in
-//             if (session.step === 1 || isGreeting) {
-//                 responseMessage = "Hello! Please log in by providing your email.";
-//                 loginSteps.set(from, { step: 2, temp: {} });
-//             } else if (session.step === 2) {
-//                 session.temp.email = message;
-//                 session.step = 3;
-//                 loginSteps.set(from, session);
-//                 responseMessage = "What is your password?";
-//             } else if (session.step === 3) {
-//                 const { email } = session.temp;
-//                 const password = message;
-//                 console.log(session);
-                
-//                 var isLoggedIn= await loginUser(email,password)
-
-//                 if (isLoggedIn) {
-//                     // ✅ Valid: store session against phone number
-//                     await pool.request()
-//                         .input("Username", email)  // phone number
-//                         .execute("CreateOrUpdateUserSession");
-
-//                     loginSteps.delete(from);
-//                     responseMessage = `Welcome ${email}, you're now logged in! You can now interact with the chatbot.`;
-//                 } else {
-//                     loginSteps.delete(from);
-//                     responseMessage = "Invalid credentials. Please start again.";
-//                 }
-//             }
 //         }
 
-//         // ✅ Send WhatsApp reply
-//         await client.messages.create({
-//             from: to,
-//             to: from,
-//             body: responseMessage
-//         });
+//     } catch (error) {
 
-//         await insertToDB(message, responseMessage, "Whatsapp", from);
-//         console.log(`Replied to ${from}`);
-//     } catch (err) {
-//         console.error("Error:", err);
 //     }
-
-//     res.send("<Response></Response>");
 // }
-

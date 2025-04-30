@@ -219,3 +219,13 @@ BEGIN
         VALUES (@Username);
     END
 END;
+
+
+CREATE PROCEDURE GetUserSessionByUsername
+    @Username VARCHAR(200)
+AS
+BEGIN
+    SELECT * 
+    FROM userSessions
+    WHERE Username = @Username
+END

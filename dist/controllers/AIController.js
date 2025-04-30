@@ -162,79 +162,79 @@ function loginUser(email, password) {
         }
     });
 }
-const loginSteps = new Map();
 function sendandReply(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const from = req.body.From; // WhatsApp number
-        const to = req.body.To; // Twilio number
-        const message = (_a = req.body.Body) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase(); // Convert to lowercase for easier matching
-        const now = new Date();
+        const from = req.body.From;
+        const message = req.body.Body;
+        console.log(req.body);
         const Account_SID = process.env.ACCOUNT_SID;
         const Auth_TOKEN = process.env.AUTH_TOKEN;
         const client = (0, twilio_1.default)(Account_SID, Auth_TOKEN);
-        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
-        let responseMessage = "";
-        // Check if the message is a greeting (e.g., "hello", "hi", etc.)
-        const greetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon"];
-        const isGreeting = greetings.some(greet => message.includes(greet));
         try {
-            // 1. Check if user has an active session (based on phone number)
-            const sessionCheck = yield (yield pool.request()
-                .input("Username", from)
-                .execute("GetAllRecords")).recordset;
-            const sessionValid = sessionCheck.length > 0 &&
-                now < new Date(sessionCheck[0].CreatedAt.getTime() + 60 * 60 * 1000);
-            if (sessionValid) {
-                // ✅ Already logged in — get chatbot response
-                const response = yield getChatResponse(message, from);
-                responseMessage = response;
-            }
-            else {
-                // ❌ Not logged in — start login process
-                const session = loginSteps.get(from) || { step: 1, temp: {} };
-                // Start the login process if the user is not logged in
-                if (session.step === 1 || isGreeting) {
-                    responseMessage = "Hello! Please log in by providing your email.";
-                    loginSteps.set(from, { step: 2, temp: {} });
-                }
-                else if (session.step === 2) {
-                    session.temp.email = message;
-                    session.step = 3;
-                    loginSteps.set(from, session);
-                    responseMessage = "What is your password?";
-                }
-                else if (session.step === 3) {
-                    const { email } = session.temp;
-                    const password = message;
-                    console.log(session);
-                    var isLoggedIn = yield loginUser(email, password);
-                    if (isLoggedIn) {
-                        // ✅ Valid: store session against phone number
-                        yield pool.request()
-                            .input("Username", email) // phone number
-                            .execute("CreateOrUpdateUserSession");
-                        loginSteps.delete(from);
-                        responseMessage = `Welcome ${email}, you're now logged in! You can now interact with the chatbot.`;
-                    }
-                    else {
-                        loginSteps.delete(from);
-                        responseMessage = "Invalid credentials. Please start again.";
-                    }
-                }
-            }
-            // ✅ Send WhatsApp reply
-            yield client.messages.create({
-                from: to,
-                to: from,
-                body: responseMessage
-            });
-            yield insertToDB(message, responseMessage, "Whatsapp", from);
+            const number = from.split("+")[1];
+            console.log(number);
+            const response = yield getChatResponse(message, number);
+            client.messages
+                .create({
+                from: req.body.To,
+                to: req.body.From,
+                body: response,
+            })
+                .then(message => console.log(message.sid))
+                .catch(error => console.error(error));
+            yield insertToDB(message, response, "Whatsapp", number);
             console.log(`Replied to ${from}`);
         }
         catch (err) {
-            console.error("Error:", err);
+            console.error('Error sending reply:', err);
         }
-        res.send("<Response></Response>");
+        res.send('<Response></Response>');
     });
 }
+const userSessions = new Map();
+const SESSION_TIMEOUT = 60 * 60 * 1000;
+function validateUserSession(username) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+            const result = yield pool.request()
+                .input('Username', username)
+                .execute("GetUserSessionByUsername");
+            if (result.recordset.length === 0) {
+                return false;
+            }
+            const createdAt = new Date(result.recordset[0].CreatedAt);
+            const currentTime = new Date();
+            const timeDiff = currentTime.getTime() - createdAt.getTime();
+            return timeDiff < SESSION_TIMEOUT;
+        }
+        catch (err) {
+            console.error('Database error while validating session:', err);
+            return false;
+        }
+    });
+}
+function createNewAuthState(number) {
+    return {
+        authenticated: false,
+        state: 'INIT',
+    };
+}
+// export async function sendAndReply(req: Request, res: Response) {
+//     const from = req.body.From;
+//     const message = req.body.Body;
+//     console.log(req.body);
+//     const Account_SID = process.env.ACCOUNT_SID as string;
+//     const Auth_TOKEN = process.env.AUTH_TOKEN as string;
+//     const client = twilio(Account_SID, Auth_TOKEN);
+//     try {
+//         const number = from.split("+")[1];
+//         console.log(number);
+//         let responseText = '';
+//         const isValidSession = await validateUserSession(number);
+//         if (isValidSession) {
+//         } else {
+//         }
+//     } catch (error) {
+//     }
+// }
