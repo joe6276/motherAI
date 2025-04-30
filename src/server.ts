@@ -1,6 +1,6 @@
 import express, { json,Request,Response } from 'express'
 import router from './Routes/AIRoutes'
-import './controllers/telegramBot'
+// import './controllers/telegramBot'
 import cors from 'cors'
 import companyRouter from './Routes/companyRoutes'
 import userRouter from './Routes/userRoutes'

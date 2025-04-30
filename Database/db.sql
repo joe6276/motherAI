@@ -179,6 +179,43 @@ BEGIN
  SELECT * FROM Users WHERE Email = @Email
 END
 
+CREATE OR ALTER PROCEDURE getUserById(@Id INT)
+AS
+BEGIN
+ SELECT FirstName,LastName,Email ,Occupation FROM Users WHERE Id = @Id
+END
 
 
+EXEC getUserByEmail '2'
+
+ SELECT FirstName,LastName,Email ,Occupation FROM Users WHERE Id='3'
 EXEC getUserByEmail 'joendambuki16@gmail.com'
+
+
+CREATE TABLE userSessions(
+    Id INT PRIMARY KEY IDENTITY,
+    Username VARCHAR(200),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+)
+
+
+CREATE PROCEDURE CreateOrUpdateUserSession
+    @Username VARCHAR(200)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM userSessions WHERE Username = @Username)
+    BEGIN
+        -- Update CreatedAt if the user already exists
+        UPDATE userSessions
+        SET CreatedAt = GETDATE()
+        WHERE Username = @Username;
+    END
+    ELSE
+    BEGIN
+        -- Insert new session
+        INSERT INTO userSessions (Username)
+        VALUES (@Username);
+    END
+END;
