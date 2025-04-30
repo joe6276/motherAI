@@ -16,6 +16,8 @@ exports.getChatResponse = getChatResponse;
 exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
 exports.getRecords = getRecords;
+exports.sendandReply = sendandReply;
+const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
 const API_KEy = process.env.API_URL;
@@ -96,5 +98,35 @@ function getRecords(req, res) {
         catch (error) {
             return res.status(500).json(error);
         }
+    });
+}
+function sendandReply(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const from = req.body.From;
+        const message = req.body.Body;
+        console.log(req.body);
+        const Account_SID = process.env.ACCOUNT_SID;
+        const Auth_TOKEN = process.env.AUTH_TOKEN;
+        const client = (0, twilio_1.default)(Account_SID, Auth_TOKEN);
+        try {
+            const number = from.split("+")[1];
+            console.log(number);
+            const response = yield getChatResponse(message, number);
+            client.messages
+                .create({
+                from: req.body.To, // Twilio Sandbox Number
+                to: req.body.From, // Your verified number
+                body: response,
+            })
+                .then(message => console.log(message.sid))
+                .catch(error => console.error(error));
+            yield insertToDB(message, response, "Whatsapp", number);
+            console.log(`Replied to ${from}`);
+        }
+        catch (err) {
+            console.error('Error sending reply:', err);
+        }
+        // ✅ Twilio still expects an XML response even if you send the reply via API
+        res.send('<Response></Response>');
     });
 }
