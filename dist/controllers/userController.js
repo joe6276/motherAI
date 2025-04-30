@@ -90,7 +90,7 @@ function loginUser(req, res) {
                 return res.status(400).json({ message: "Invalid Credentials" });
             }
             else {
-                const token = jsonwebtoken_1.default.sign({ id: user[0].Id, role: user[0].Role }, process.env.SECRET);
+                const token = jsonwebtoken_1.default.sign({ id: user[0].Id, role: user[0].Role, companyId: user[0].CompanyId }, process.env.SECRET);
                 return res.status(200).json({ message: "Login Successful", token, id: user[0].Id });
             }
         }
