@@ -195,10 +195,10 @@ function getOccupation(email) {
             .input("Email", email)
             .execute("getUserByEmail")).recordset;
         if (user.length == 0) {
-            return user[0].Occupation;
+            return "No occupation yet";
         }
         else {
-            return "No occupation yet";
+            return user[0].Occupation;
         }
     });
 }

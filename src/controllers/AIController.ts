@@ -210,10 +210,11 @@ export async function getOccupation(email:string){
   
    
     if(  user.length==0){
-        return user[0].Occupation
+        return "No occupation yet"
+        
     }else{
         
-        return "No occupation yet"
+        return user[0].Occupation
     }
 }
 const loginSteps = new Map<string, { step: number, temp: any }>();
