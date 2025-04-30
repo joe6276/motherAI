@@ -3,7 +3,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 import TelegramBot from 'node-telegram-bot-api'
-import { getChatResponse, insertToDB } from './AIController';
+import { getChatResponse, getChatResponse2, insertToDB } from './AIController';
 
 const bot = new TelegramBot(process.env.TElEGRAM as string, { polling: true });
 
@@ -13,7 +13,7 @@ bot.on('message', async (msg) => {
     const userMessage = msg.text as string;
   
     // Call your GPT API or custom logic here
-    const botReply = await getChatResponse(userMessage,msg.from?.username as string);
+    const botReply = await getChatResponse2(userMessage);
   
     // Simulate typing
     await bot.sendChatAction(chatId, 'typing');

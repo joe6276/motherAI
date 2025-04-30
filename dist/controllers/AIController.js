@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChatResponse = getChatResponse;
+exports.getChatResponse2 = getChatResponse2;
 exports.getChatResponse1 = getChatResponse1;
 exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
@@ -41,6 +42,40 @@ function getChatResponse(message, userId) {
                 messages.push({ role: "assistant", content: element.output });
             });
         }
+        messages.push({ role: "user", content: message });
+        const response = yield fetch(API_URL, {
+            method: "POST",
+            headers: {
+                'Authorization': `Bearer ${API_KEy}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages,
+                temperature: 0.9 //0-2
+            })
+        });
+        const content = yield response.json();
+        return content.choices[0].message.content;
+    });
+}
+function getChatResponse2(message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        const messages = [{
+                role: 'system', content: `
+        You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
+        
+    `
+            }];
+        console.log(messages);
+        //  history = await (await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset
+        //     if (history.length) {
+        //         history.forEach(element => {
+        //             messages.push({ role: "user", content: element.originalCommand })
+        //             messages.push({ role: "assistant", content: element.output })
+        //         });
+        //     }
         messages.push({ role: "user", content: message });
         const response = yield fetch(API_URL, {
             method: "POST",
