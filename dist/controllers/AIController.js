@@ -243,6 +243,7 @@ function sendandReply(req, res) {
                 // Step 4: Already authenticated
                 console.log("here", (_b = session.temp) === null || _b === void 0 ? void 0 : _b.email);
                 const occupation = yield getOccupation((_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
+                console.log(occupation);
                 const response = yield getChatResponse1(message, from, occupation);
                 responseMessage = response;
             }

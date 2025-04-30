@@ -257,6 +257,7 @@ export async function sendandReply(req: Request, res: Response) {
             // Step 4: Already authenticated
             console.log("here" , session.temp?.email);
             const occupation = await getOccupation(session.temp?.email)
+            console.log(occupation)
             const response = await getChatResponse1(message, from,   occupation );
             responseMessage = response;
         }
