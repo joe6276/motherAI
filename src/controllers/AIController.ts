@@ -99,59 +99,6 @@ export async function getRecords(req: Request, res: Response) {
 }
 
 
-// async function loginWhatsapp(req: Request, res: Response){
-
-//     let object={
-//         email:"",
-//         password:""
-//     }
-//     try {
-//         const from = req.body.From;
-//         const to = req.body.TO
-//         const message = req.body.Body;
-//         const now = new Date();
-//         const pool =await mssql.connect(sqlConfig)
-//        var user = await(await pool.request()
-//         .input("Username", message)
-//         .execute("GetAllRecords")).recordset
-//         if(user.length!==0 && now < new Date(user[0].CreatedAt)){
-//                 // he is logged in 
-//         }else{
-//              sendandReply(to ,from, "Kindly Login") 
-//              object.email= 
-//         }
-//     } catch (error) {
-
-//     }
-// }
-// export async function sendandReply(to:string, from:string , message:string) {
-//     const Account_SID = process.env.ACCOUNT_SID as string
-//     const Auth_TOKEN = process.env.AUTH_TOKEN as string
-//     const client = twilio(Account_SID, Auth_TOKEN)
-//     try {
-
-//         // const number= from.split("+")[1]
-//         // console.log(number);
-
-//         // const response = await getChatResponse(message,number)
-
-//         client.messages
-//         .create({
-//             from, // Twilio Sandbox Number
-//             to,  // Your verified number
-//             body:message,
-//         })
-//         .then(message => console.log(message.sid))
-//         .catch(error => console.error(error));
-//         // await insertToDB(message,response, "Whatsapp",number)
-
-//     } catch (err) {
-//         console.error('Error sending reply:', err);
-//     }
-
-
-// }
-
 export async function loginUser(email: string, password: string) {
 
 
@@ -171,14 +118,13 @@ export async function loginUser(email: string, password: string) {
 
 }
 
-
 export async function sendandReply(req: Request, res: Response) {
 
 
     const from = req.body.From;
     const message = req.body.Body;
   console.log(req.body);
-
+  
     const Account_SID = process.env.ACCOUNT_SID as string
     const Auth_TOKEN = process.env.AUTH_TOKEN as string
     const client = twilio(Account_SID, Auth_TOKEN)
@@ -186,13 +132,13 @@ export async function sendandReply(req: Request, res: Response) {
 
         const number= from.split("+")[1]
         console.log(number);
-
+        
         const response = await getChatResponse(message,number)
 
         client.messages
         .create({
-            from: req.body.To, 
-            to: req.body.From, 
+            from: req.body.To, // Twilio Sandbox Number
+            to: req.body.From,  // Your verified number
             body:response,
         })
         .then(message => console.log(message.sid))
@@ -202,75 +148,7 @@ export async function sendandReply(req: Request, res: Response) {
     } catch (err) {
         console.error('Error sending reply:', err);
     }
+
+    // ✅ Twilio still expects an XML response even if you send the reply via API
     res.send('<Response></Response>');
 }
-interface AuthState {
-    email?: string;
-    authenticated: boolean;
-    state: 'INIT' | 'AWAITING_EMAIL' | 'AWAITING_PASSWORD' | 'AUTHENTICATED';
-}
-const userSessions = new Map<string, AuthState>();
-
-const SESSION_TIMEOUT = 60 * 60 * 1000;
-
-async function validateUserSession(username: string): Promise<boolean> {
-    try {
-        const pool = await mssql.connect(sqlConfig)
-
-        const result = await pool.request()
-            .input('Username', username)
-            .execute("GetUserSessionByUsername")
-
-        if (result.recordset.length === 0) {
-            return false;
-        }
-
-        const createdAt = new Date(result.recordset[0].CreatedAt);
-        const currentTime = new Date();
-        const timeDiff = currentTime.getTime() - createdAt.getTime();
-
-        return timeDiff < SESSION_TIMEOUT;
-    } catch (err) {
-        console.error('Database error while validating session:', err);
-        return false;
-    }
-}
-
-
-
-
-function createNewAuthState(number: string): AuthState {
-    return {
-        authenticated: false,
-        state: 'INIT',
-    };
-}
-
-// export async function sendAndReply(req: Request, res: Response) {
-//     const from = req.body.From;
-//     const message = req.body.Body;
-//     console.log(req.body);
-
-//     const Account_SID = process.env.ACCOUNT_SID as string;
-//     const Auth_TOKEN = process.env.AUTH_TOKEN as string;
-//     const client = twilio(Account_SID, Auth_TOKEN);
-
-//     try {
-//         const number = from.split("+")[1];
-//         console.log(number);
-
-//         let responseText = '';
-
-//         const isValidSession = await validateUserSession(number);
-
-
-//         if (isValidSession) {
-
-//         } else {
-
-//         }
-
-//     } catch (error) {
-
-//     }
-// }
