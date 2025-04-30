@@ -90,3 +90,18 @@ export async function loginUser(req:Request, res:Response){
         return res.status(500).json(error)
     }
 }
+
+export async function getAdmin(req:Request<{id:number}>, res:Response){
+ try {
+    
+    const pool = await mssql.connect(sqlConfig)
+    const user =await(await pool.request()
+    .input("CompanyId", req.params.id)
+    .execute("GetAdmin")).recordset
+
+    return res.status(200).json(user)
+
+ } catch (error) {
+    return res.status(500).json(error)
+ }
+}

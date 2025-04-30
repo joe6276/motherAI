@@ -8,4 +8,5 @@ const userRouter = (0, express_1.Router)();
 userRouter.post("/register", verifyAdmin_1.verifyAdmin, userController_1.addUser);
 userRouter.post("/login", userController_1.loginUser);
 userRouter.post("/admin", middleWares_1.verifySuperAdminToken, userController_1.createAdmin);
+userRouter.get("/:id", userController_1.getAdmin);
 exports.default = userRouter;

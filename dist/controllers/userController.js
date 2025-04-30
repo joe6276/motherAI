@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createAdmin = createAdmin;
 exports.addUser = addUser;
 exports.loginUser = loginUser;
+exports.getAdmin = getAdmin;
 const mssql_1 = __importDefault(require("mssql"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const Config_1 = require("../Config");
@@ -93,6 +94,20 @@ function loginUser(req, res) {
                 const token = jsonwebtoken_1.default.sign({ id: user[0].Id }, process.env.SECRET);
                 return res.status(200).json({ message: "Login Successful", companyId: user[0].CompanyId, token, id: user[0].Id });
             }
+        }
+        catch (error) {
+            return res.status(500).json(error);
+        }
+    });
+}
+function getAdmin(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+            const user = yield (yield pool.request()
+                .input("CompanyId", req.params.id)
+                .execute("GetAdmin")).recordset;
+            return res.status(200).json(user);
         }
         catch (error) {
             return res.status(500).json(error);

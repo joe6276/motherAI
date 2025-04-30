@@ -33,7 +33,6 @@ END;
 
 
 
-
 CREATE OR ALTER PROCEDURE GetAllRecords
 AS
 BEGIN
@@ -157,6 +156,14 @@ BEGIN
     WHERE Id = @UserId;
 END
 
+
+CREATE OR ALTER PROCEDURE GetAdmin
+    @CompanyId INT
+AS
+BEGIN
+SELECT FirstName,LastName,Email  FROM Users WHERE CompanyId=@CompanyId AND Role ='admin'
+
+END
 
 CREATE PROCEDURE  getUserByEmail(@Email VARCHAR(150))
 AS
