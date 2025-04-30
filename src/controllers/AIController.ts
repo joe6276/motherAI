@@ -43,7 +43,7 @@ export async function getChatResponse(message: string, userId: string) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            model: 'gpt-4-turbo',
+            model: 'gpt-3.5-turbo',
             messages,
             temperature: 0.9 //0-2
         })
@@ -76,7 +76,7 @@ export async function aiChat(req: Request, res: Response) {
 
         const response = await getChatResponse(question, userId)
 
-        await insertToDB(question, response, "website", userId)
+        // await insertToDB(question, response, "website", userId)
         return res.status(200).json(response)
     } catch (error) {
         return res.status(500).json(error)

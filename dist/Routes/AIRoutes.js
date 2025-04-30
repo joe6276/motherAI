@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const AIController_1 = require("../controllers/AIController");
+// import { tokenRequired } from "../middleWares/tokenRequired"
 const router = express_1.default.Router();
 router.post("", AIController_1.aiChat);
 // router.post('/webhook', sendandReply)

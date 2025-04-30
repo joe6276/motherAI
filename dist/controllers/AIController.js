@@ -46,7 +46,7 @@ function getChatResponse(message, userId) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4-turbo',
+                model: 'gpt-3.5-turbo',
                 messages,
                 temperature: 0.9 //0-2
             })
@@ -77,7 +77,7 @@ function aiChat(req, res) {
         try {
             const { question, userId } = req.body;
             const response = yield getChatResponse(question, userId);
-            yield insertToDB(question, response, "website", userId);
+            // await insertToDB(question, response, "website", userId)
             return res.status(200).json(response);
         }
         catch (error) {
