@@ -6,23 +6,6 @@ import TelegramBot from 'node-telegram-bot-api'
 import {  getChatResponse2, insertToDB, loginUserBot } from './AIController';
 
 const bot = new TelegramBot(process.env.TElEGRAM as string, { polling: true });
-
-bot.on('message', async (msg) => {
-    // console.log(msg)
-    const chatId = msg.chat.id;
-    const userMessage = msg.text as string;
-  
-    // Call your GPT API or custom logic here
-    const botReply = await getChatResponse2(userMessage);
-  
-    // Simulate typing
-    await bot.sendChatAction(chatId, 'typing');
-   
-    bot.sendMessage(chatId, botReply);
-
-    await insertToDB(userMessage,botReply, "Telegram",msg.from?.username as string)
-})
-
 const loginSteps = new Map<number, { step: number, temp: any }>();
 
 bot.on('message', async (msg) => {
