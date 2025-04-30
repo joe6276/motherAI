@@ -54,6 +54,49 @@ export async function getChatResponse(message: string, userId: string) {
     return content.choices[0].message.content
 }
 
+export async function getChatResponse1(message: string ,userId:string) {
+    const pool = await mssql.connect(sqlConfig)
+  
+    const messages: Users[] = [{
+        role: 'system', content: `
+        You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
+      
+    `}]
+
+    console.log(messages);
+
+
+    const history = await (await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset
+
+    if (history.length) {
+        history.forEach(element => {
+            messages.push({ role: "user", content: element.originalCommand })
+            messages.push({ role: "assistant", content: element.output })
+
+        });
+    }
+
+    messages.push({ role: "user", content: message })
+
+
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${API_KEy}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages,
+            temperature: 0.9 //0-2
+        })
+
+
+    })
+    const content = await response.json()
+    return content.choices[0].message.content
+}
+
 export async function insertToDB(question: string, response: string, channel: string, userId: string) {
     try {
         const pool = await mssql.connect(sqlConfig);
@@ -113,7 +156,7 @@ export async function sendandReply(req: Request, res: Response) {
         const number= from.split("+")[1]
         console.log(number);
 
-        const response = await getChatResponse(message,number)
+        const response = await getChatResponse1(message, number)
 
         client.messages
         .create({

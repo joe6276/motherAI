@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChatResponse = getChatResponse;
+exports.getChatResponse1 = getChatResponse1;
 exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
 exports.getRecords = getRecords;
@@ -30,6 +31,40 @@ function getChatResponse(message, userId) {
                 role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
         also Kindly advise based on User profession which is ${occupation[0].Occupation}
+    `
+            }];
+        console.log(messages);
+        const history = yield (yield pool.request().input("UserId", userId).execute("GetUserRecords")).recordset;
+        if (history.length) {
+            history.forEach(element => {
+                messages.push({ role: "user", content: element.originalCommand });
+                messages.push({ role: "assistant", content: element.output });
+            });
+        }
+        messages.push({ role: "user", content: message });
+        const response = yield fetch(API_URL, {
+            method: "POST",
+            headers: {
+                'Authorization': `Bearer ${API_KEy}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages,
+                temperature: 0.9 //0-2
+            })
+        });
+        const content = yield response.json();
+        return content.choices[0].message.content;
+    });
+}
+function getChatResponse1(message, userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        const messages = [{
+                role: 'system', content: `
+        You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
+      
     `
             }];
         console.log(messages);
@@ -111,7 +146,7 @@ function sendandReply(req, res) {
         try {
             const number = from.split("+")[1];
             console.log(number);
-            const response = yield getChatResponse(message, number);
+            const response = yield getChatResponse1(message, number);
             client.messages
                 .create({
                 from: req.body.To, // Twilio Sandbox Number
