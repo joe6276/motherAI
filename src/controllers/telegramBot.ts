@@ -3,7 +3,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 import TelegramBot from 'node-telegram-bot-api'
-import {  getChatResponse2, insertToDB, loginUserBot } from './AIController';
+import {  getChatResponse2, getOccupation, insertToDB, loginUserBot } from './AIController';
 
 const bot = new TelegramBot(process.env.TElEGRAM as string, { polling: true });
 const loginSteps = new Map<number, { step: number, temp: any }>();
@@ -46,7 +46,10 @@ bot.on('message', async (msg) => {
         } else {
             // Authenticated: Chatbot mode
             await bot.sendChatAction(chatId, 'typing');
-            const botReply = await getChatResponse2(userMessage as string , result!.occupation as string);
+            console.log("here" , session.temp?.email);
+           const occupation = await getOccupation(session.temp?.email)
+        
+            const botReply = await getChatResponse2(userMessage as string ,occupation );
             responseMessage = botReply;
 
             // Store conversation

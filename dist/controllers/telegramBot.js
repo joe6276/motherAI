@@ -20,7 +20,7 @@ const AIController_1 = require("./AIController");
 const bot = new node_telegram_bot_api_1.default(process.env.TElEGRAM, { polling: true });
 const loginSteps = new Map();
 bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const chatId = msg.chat.id;
     const userMessage = (_a = msg.text) === null || _a === void 0 ? void 0 : _a.trim();
     const username = ((_b = msg.from) === null || _b === void 0 ? void 0 : _b.username) || chatId.toString();
@@ -58,7 +58,9 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
         else {
             // Authenticated: Chatbot mode
             yield bot.sendChatAction(chatId, 'typing');
-            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, result.occupation);
+            console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
+            const occupation = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
+            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, occupation);
             responseMessage = botReply;
             // Store conversation
             yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);

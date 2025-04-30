@@ -200,6 +200,22 @@ export async function loginUserBot(email:string, password:string){
             return {islogged:true, occupation:user[0].Occupation}
         }
 }
+
+export async function getOccupation(email:string){    
+    const pool = await mssql.connect(sqlConfig)
+    const user =await(await pool.request()
+    .input("Email", email)
+    .execute("getUserByEmail")).recordset as User[]
+   
+  
+   
+    if(  user.length==0){
+        return user[0].Occupation
+    }else{
+        
+        return "No occupation yet"
+    }
+}
 const loginSteps = new Map<string, { step: number, temp: any }>();
 
 export async function sendandReply(req: Request, res: Response) {
@@ -208,7 +224,7 @@ export async function sendandReply(req: Request, res: Response) {
     const message = req.body.Body?.trim();
     const client = twilio(process.env.ACCOUNT_SID!, process.env.AUTH_TOKEN!);
 
-    let result;
+    let myemail='';
     let responseMessage = "";
 
     try {
@@ -228,8 +244,7 @@ export async function sendandReply(req: Request, res: Response) {
             const password = message;
 
             const isLoginValid= await loginUserBot(email,password)
-            result=isLoginValid
-            console.log(result);
+            myemail=email
             
             if (isLoginValid) {
                 loginSteps.set(from, { step: 4, temp: { email } });
@@ -240,8 +255,9 @@ export async function sendandReply(req: Request, res: Response) {
             }
         } else {
             // Step 4: Already authenticated
-            console.log("here" ,result);
-            const response = await getChatResponse1(message, from,   result!.occupation as string);
+            console.log("here" , session.temp?.email);
+            const occupation = await getOccupation(session.temp?.email)
+            const response = await getChatResponse1(message, from,   occupation );
             responseMessage = response;
         }
 

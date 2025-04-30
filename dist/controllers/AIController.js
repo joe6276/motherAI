@@ -19,6 +19,7 @@ exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
 exports.getRecords = getRecords;
 exports.loginUserBot = loginUserBot;
+exports.getOccupation = getOccupation;
 exports.sendandReply = sendandReply;
 const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
@@ -187,15 +188,29 @@ function loginUserBot(email, password) {
         }
     });
 }
+function getOccupation(email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        const user = yield (yield pool.request()
+            .input("Email", email)
+            .execute("getUserByEmail")).recordset;
+        if (user.length == 0) {
+            return user[0].Occupation;
+        }
+        else {
+            return "No occupation yet";
+        }
+    });
+}
 const loginSteps = new Map();
 function sendandReply(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b, _c;
         const from = req.body.From;
         const to = req.body.To;
         const message = (_a = req.body.Body) === null || _a === void 0 ? void 0 : _a.trim();
         const client = (0, twilio_1.default)(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
-        let result;
+        let myemail = '';
         let responseMessage = "";
         try {
             const session = loginSteps.get(from) || { step: 1, temp: {} };
@@ -214,8 +229,7 @@ function sendandReply(req, res) {
                 const { email } = session.temp;
                 const password = message;
                 const isLoginValid = yield loginUserBot(email, password);
-                result = isLoginValid;
-                console.log(result);
+                myemail = email;
                 if (isLoginValid) {
                     loginSteps.set(from, { step: 4, temp: { email } });
                     responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
@@ -227,8 +241,9 @@ function sendandReply(req, res) {
             }
             else {
                 // Step 4: Already authenticated
-                console.log("here", result);
-                const response = yield getChatResponse1(message, from, result.occupation);
+                console.log("here", (_b = session.temp) === null || _b === void 0 ? void 0 : _b.email);
+                const occupation = yield getOccupation((_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
+                const response = yield getChatResponse1(message, from, occupation);
                 responseMessage = response;
             }
             yield client.messages.create({
