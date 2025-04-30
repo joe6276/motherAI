@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import twilio from 'twilio'
 import mssql from 'mssql'
 import { sqlConfig } from "../Config";
-import { User } from "../interfaces";
 const API_KEy = process.env.API_URL as string
 const API_URL = "https://api.openai.com/v1/chat/completions"
 
@@ -98,56 +97,5 @@ export async function getRecords(req: Request, res: Response) {
 }
 
 
-// export async function loginUser(email: string, password: string) {
 
 
-//     ///Geneerate TOken
-//     const pool = await mssql.connect(sqlConfig)
-//     const user = await (await pool.request()
-//         .input("Email", email)
-//         .execute("getUserByEmail")).recordset as User[]
-
-//     const isValid = await bcrypt.compare(password, user[0].Password)
-
-//     if (!isValid || user.length == 0) {
-//         return false
-//     } else {
-//         return true;
-//     }
-
-// }
-
-export async function sendandReply(req: Request, res: Response) {
-
-
-    const from = req.body.From;
-    const message = req.body.Body;
-  console.log(req.body);
-
-    const Account_SID = process.env.ACCOUNT_SID as string
-    const Auth_TOKEN = process.env.AUTH_TOKEN as string
-    const client = twilio(Account_SID, Auth_TOKEN)
-    try {
-
-        const number= from.split("+")[1]
-        console.log(number);
-
-        const response = await getChatResponse(message,number)
-
-        client.messages
-        .create({
-            from: req.body.To, // Twilio Sandbox Number
-            to: req.body.From,  // Your verified number
-            body:response,
-        })
-        .then(message => console.log(message.sid))
-        .catch(error => console.error(error));
-        await insertToDB(message,response, "Whatsapp",number)
-        console.log(`Replied to ${from}`);
-    } catch (err) {
-        console.error('Error sending reply:', err);
-    }
-
-    // ✅ Twilio still expects an XML response even if you send the reply via API
-    res.send('<Response></Response>');
-}
