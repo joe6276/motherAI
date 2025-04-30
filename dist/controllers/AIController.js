@@ -16,12 +16,10 @@ exports.getChatResponse = getChatResponse;
 exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
 exports.getRecords = getRecords;
-exports.loginUser = loginUser;
 exports.sendandReply = sendandReply;
 const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const API_KEy = process.env.API_URL;
 const API_URL = "https://api.openai.com/v1/chat/completions";
 function getChatResponse(message, userId) {
@@ -102,22 +100,19 @@ function getRecords(req, res) {
         }
     });
 }
-function loginUser(email, password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        ///Geneerate TOken
-        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
-        const user = yield (yield pool.request()
-            .input("Email", email)
-            .execute("getUserByEmail")).recordset;
-        const isValid = yield bcryptjs_1.default.compare(password, user[0].Password);
-        if (!isValid || user.length == 0) {
-            return false;
-        }
-        else {
-            return true;
-        }
-    });
-}
+// export async function loginUser(email: string, password: string) {
+//     ///Geneerate TOken
+//     const pool = await mssql.connect(sqlConfig)
+//     const user = await (await pool.request()
+//         .input("Email", email)
+//         .execute("getUserByEmail")).recordset as User[]
+//     const isValid = await bcrypt.compare(password, user[0].Password)
+//     if (!isValid || user.length == 0) {
+//         return false
+//     } else {
+//         return true;
+//     }
+// }
 function sendandReply(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const from = req.body.From;
