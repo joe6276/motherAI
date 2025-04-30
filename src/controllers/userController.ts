@@ -1,7 +1,7 @@
 
 import { Request, Response } from "express";
 import mssql from 'mssql'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'b'
 import { sqlConfig } from "../Config";
 import jwt from 'jsonwebtoken'
 import { User } from "../interfaces/index";
