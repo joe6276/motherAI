@@ -57,13 +57,13 @@ export async function getChatResponse(message: string, userId: string) {
 }
 
 
-export async function getChatResponse2(message: string) {
+export async function getChatResponse2(message: string,occupation:string) {
     const pool = await mssql.connect(sqlConfig)
     
     const messages: Users[] = [{
         role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-        
+        also Kindly advise based on User profession which is ${occupation}
     `}]
 
     console.log(messages);
@@ -100,13 +100,13 @@ export async function getChatResponse2(message: string) {
     return content.choices[0].message.content
 }
 
-export async function getChatResponse1(message: string ,userId:string) {
+export async function getChatResponse1(message: string ,userId:string, occupation:string) {
     const pool = await mssql.connect(sqlConfig)
   
     const messages: Users[] = [{
         role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-      
+      also Kindly advise based on User profession which is ${occupation}
     `}]
 
     console.log(messages);
@@ -194,10 +194,10 @@ export async function loginUserBot(email:string, password:string){
         const isValid =  await bcrypt.compare(password, user[0].Password)
        
         if( !isValid || user.length==0){
-            return false
+            return {islogged:false}
         }else{
             
-            return true
+            return {islogged:true, occupation:user[0].Occupation}
         }
 }
 const loginSteps = new Map<string, { step: number, temp: any }>();
@@ -208,7 +208,7 @@ export async function sendandReply(req: Request, res: Response) {
     const message = req.body.Body?.trim();
     const client = twilio(process.env.ACCOUNT_SID!, process.env.AUTH_TOKEN!);
 
-
+    let result;
     let responseMessage = "";
 
     try {
@@ -228,7 +228,9 @@ export async function sendandReply(req: Request, res: Response) {
             const password = message;
 
             const isLoginValid= await loginUserBot(email,password)
-
+            result=isLoginValid
+            console.log(result);
+            
             if (isLoginValid) {
                 loginSteps.set(from, { step: 4, temp: { email } });
                 responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
@@ -238,7 +240,7 @@ export async function sendandReply(req: Request, res: Response) {
             }
         } else {
             // Step 4: Already authenticated
-            const response = await getChatResponse1(message, from);
+            const response = await getChatResponse1(message, from, result!.occupation as string);
             responseMessage = response;
         }
 

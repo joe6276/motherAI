@@ -25,6 +25,7 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
     const userMessage = (_a = msg.text) === null || _a === void 0 ? void 0 : _a.trim();
     const username = ((_b = msg.from) === null || _b === void 0 ? void 0 : _b.username) || chatId.toString();
     let responseMessage = "";
+    let result;
     try {
         const session = loginSteps.get(chatId) || { step: 1, temp: {} };
         if (session.step === 1) {
@@ -42,7 +43,9 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             const { email } = session.temp;
             const password = userMessage;
             const isloginValid = yield (0, AIController_1.loginUserBot)(email, password);
-            if (isloginValid) {
+            result = isloginValid;
+            console.log(result);
+            if (isloginValid.islogged) {
                 session.step = 4;
                 loginSteps.set(chatId, session);
                 responseMessage = `✅ Login successful, ${email}. You can now chat with the bot.`;
@@ -55,7 +58,7 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
         else {
             // Authenticated: Chatbot mode
             yield bot.sendChatAction(chatId, 'typing');
-            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage);
+            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, result.occupation);
             responseMessage = botReply;
             // Store conversation
             yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);

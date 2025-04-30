@@ -14,7 +14,7 @@ bot.on('message', async (msg) => {
     const username = msg.from?.username || chatId.toString();
     
     let responseMessage = "";
-
+    let result;
     try {
         const session = loginSteps.get(chatId) || { step: 1, temp: {} };
 
@@ -32,8 +32,10 @@ bot.on('message', async (msg) => {
             const password = userMessage as string;
 
            const isloginValid =await loginUserBot(email, password)
-
-            if (isloginValid) {
+            result=isloginValid
+            console.log(result);
+            
+            if (isloginValid.islogged) {
                 session.step = 4;
                 loginSteps.set(chatId, session);
                 responseMessage = `✅ Login successful, ${email}. You can now chat with the bot.`;
@@ -44,7 +46,7 @@ bot.on('message', async (msg) => {
         } else {
             // Authenticated: Chatbot mode
             await bot.sendChatAction(chatId, 'typing');
-            const botReply = await getChatResponse2(userMessage as string);
+            const botReply = await getChatResponse2(userMessage as string , result!.occupation as string);
             responseMessage = botReply;
 
             // Store conversation

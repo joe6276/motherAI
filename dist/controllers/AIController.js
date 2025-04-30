@@ -61,13 +61,13 @@ function getChatResponse(message, userId) {
         return content.choices[0].message.content;
     });
 }
-function getChatResponse2(message) {
+function getChatResponse2(message, occupation) {
     return __awaiter(this, void 0, void 0, function* () {
         const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
         const messages = [{
                 role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-        
+        also Kindly advise based on User profession which is ${occupation}
     `
             }];
         console.log(messages);
@@ -95,13 +95,13 @@ function getChatResponse2(message) {
         return content.choices[0].message.content;
     });
 }
-function getChatResponse1(message, userId) {
+function getChatResponse1(message, userId, occupation) {
     return __awaiter(this, void 0, void 0, function* () {
         const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
         const messages = [{
                 role: 'system', content: `
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-      
+      also Kindly advise based on User profession which is ${occupation}
     `
             }];
         console.log(messages);
@@ -180,10 +180,10 @@ function loginUserBot(email, password) {
             .execute("getUserByEmail")).recordset;
         const isValid = yield bcryptjs_1.default.compare(password, user[0].Password);
         if (!isValid || user.length == 0) {
-            return false;
+            return { islogged: false };
         }
         else {
-            return true;
+            return { islogged: true, occupation: user[0].Occupation };
         }
     });
 }
@@ -195,6 +195,7 @@ function sendandReply(req, res) {
         const to = req.body.To;
         const message = (_a = req.body.Body) === null || _a === void 0 ? void 0 : _a.trim();
         const client = (0, twilio_1.default)(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+        let result;
         let responseMessage = "";
         try {
             const session = loginSteps.get(from) || { step: 1, temp: {} };
@@ -213,6 +214,8 @@ function sendandReply(req, res) {
                 const { email } = session.temp;
                 const password = message;
                 const isLoginValid = yield loginUserBot(email, password);
+                result = isLoginValid;
+                console.log(result);
                 if (isLoginValid) {
                     loginSteps.set(from, { step: 4, temp: { email } });
                     responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
@@ -224,7 +227,7 @@ function sendandReply(req, res) {
             }
             else {
                 // Step 4: Already authenticated
-                const response = yield getChatResponse1(message, from);
+                const response = yield getChatResponse1(message, from, result.occupation);
                 responseMessage = response;
             }
             yield client.messages.create({
