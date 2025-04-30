@@ -4,6 +4,8 @@ import mssql from 'mssql'
 import { sqlConfig } from "../Config";
 const API_KEy = process.env.API_URL as string
 const API_URL = "https://api.openai.com/v1/chat/completions"
+import bcrypt from 'bcryptjs'
+import { User } from "../interfaces";
 
 interface Users {
     role: string
@@ -183,6 +185,21 @@ export async function getRecords(req: Request, res: Response) {
     }
 }
 
+export async function loginUser(email:string, password:string){    
+        const pool = await mssql.connect(sqlConfig)
+        const user =await(await pool.request()
+        .input("Email", email)
+        .execute("getUserByEmail")).recordset as User[]
+       
+        const isValid =  await bcrypt.compare(password, user[0].Password)
+       
+        if( !isValid || user.length==0){
+            return false
+        }else{
+            
+            return true
+        }
+}
 const loginSteps = new Map<string, { step: number, temp: any }>();
 
 export async function sendandReply(req: Request, res: Response) {
@@ -210,9 +227,9 @@ export async function sendandReply(req: Request, res: Response) {
             const { email } = session.temp;
             const password = message;
 
-            console.log(email,password)
+            const isLoginValid= await loginUser(email,password)
 
-            if (true) {
+            if (isLoginValid) {
                 loginSteps.set(from, { step: 4, temp: { email } });
                 responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
             } else {

@@ -18,12 +18,14 @@ exports.getChatResponse1 = getChatResponse1;
 exports.insertToDB = insertToDB;
 exports.aiChat = aiChat;
 exports.getRecords = getRecords;
+exports.loginUser = loginUser;
 exports.sendandReply = sendandReply;
 const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
 const API_KEy = process.env.API_URL;
 const API_URL = "https://api.openai.com/v1/chat/completions";
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 function getChatResponse(message, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
@@ -170,6 +172,21 @@ function getRecords(req, res) {
         }
     });
 }
+function loginUser(email, password) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        const user = yield (yield pool.request()
+            .input("Email", email)
+            .execute("getUserByEmail")).recordset;
+        const isValid = yield bcryptjs_1.default.compare(password, user[0].Password);
+        if (!isValid || user.length == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    });
+}
 const loginSteps = new Map();
 function sendandReply(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -195,8 +212,8 @@ function sendandReply(req, res) {
             else if (session.step === 3) {
                 const { email } = session.temp;
                 const password = message;
-                console.log(email, password);
-                if (true) {
+                const isLoginValid = yield loginUser(email, password);
+                if (isLoginValid) {
                     loginSteps.set(from, { step: 4, temp: { email } });
                     responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
                 }
