@@ -171,86 +171,123 @@ export async function loginUser(email:string, password:string){
     
 }
 
-const loginSteps = new Map<string, { step: number, temp: any }>();
 
 export async function sendandReply(req: Request, res: Response) {
-    const from = req.body.From;         // WhatsApp number
-    const to = req.body.To;             // Twilio number
-    const message = req.body.Body?.trim().toLowerCase(); // Convert to lowercase for easier matching
-    const now = new Date();
 
-    const Account_SID = process.env.ACCOUNT_SID as string;
-    const Auth_TOKEN = process.env.AUTH_TOKEN as string;
-    const client = twilio(Account_SID, Auth_TOKEN);
 
-    const pool = await mssql.connect(sqlConfig);
-    let responseMessage = "";
-
-    // Check if the message is a greeting (e.g., "hello", "hi", etc.)
-    const greetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon"];
-    const isGreeting = greetings.some(greet => message.includes(greet));
-
+    const from = req.body.From;
+    const message = req.body.Body;
+  console.log(req.body);
+  
+    const Account_SID = process.env.ACCOUNT_SID as string
+    const Auth_TOKEN = process.env.AUTH_TOKEN as string
+    const client = twilio(Account_SID, Auth_TOKEN)
     try {
-        // 1. Check if user has an active session (based on phone number)
-        const sessionCheck = await (await pool.request()
-            .input("Username", from)
-            .execute("GetAllRecords")).recordset;
 
-        const sessionValid = sessionCheck.length > 0 &&
-            now < new Date(sessionCheck[0].CreatedAt.getTime() + 60 * 60 * 1000);
+        const number= from.split("+")[1]
+        console.log(number);
+        
+        const response = await getChatResponse(message,number)
 
-        if (sessionValid) {
-            // ✅ Already logged in — get chatbot response
-            const response = await getChatResponse(message, from);
-            responseMessage = response;
-        } else {
-            // ❌ Not logged in — start login process
-            const session = loginSteps.get(from) || { step: 1, temp: {} };
-
-            // Start the login process if the user is not logged in
-            if (session.step === 1 || isGreeting) {
-                responseMessage = "Hello! Please log in by providing your email.";
-                loginSteps.set(from, { step: 2, temp: {} });
-            } else if (session.step === 2) {
-                session.temp.email = message;
-                session.step = 3;
-                loginSteps.set(from, session);
-                responseMessage = "What is your password?";
-            } else if (session.step === 3) {
-                const { email } = session.temp;
-                const password = message;
-                console.log(session);
-                
-                var isLoggedIn= await loginUser(email,password)
-
-                if (isLoggedIn) {
-                    // ✅ Valid: store session against phone number
-                    await pool.request()
-                        .input("Username", email)  // phone number
-                        .execute("CreateOrUpdateUserSession");
-
-                    loginSteps.delete(from);
-                    responseMessage = `Welcome ${email}, you're now logged in! You can now interact with the chatbot.`;
-                } else {
-                    loginSteps.delete(from);
-                    responseMessage = "Invalid credentials. Please start again.";
-                }
-            }
-        }
-
-        // ✅ Send WhatsApp reply
-        await client.messages.create({
-            from: to,
-            to: from,
-            body: responseMessage
-        });
-
-        await insertToDB(message, responseMessage, "Whatsapp", from);
+        client.messages
+        .create({
+            from: req.body.To, // Twilio Sandbox Number
+            to: req.body.From,  // Your verified number
+            body:response,
+        })
+        .then(message => console.log(message.sid))
+        .catch(error => console.error(error));
+        await insertToDB(message,response, "Whatsapp",number)
         console.log(`Replied to ${from}`);
     } catch (err) {
-        console.error("Error:", err);
+        console.error('Error sending reply:', err);
     }
 
-    res.send("<Response></Response>");
+    // ✅ Twilio still expects an XML response even if you send the reply via API
+    res.send('<Response></Response>');
 }
+
+// const loginSteps = new Map<string, { step: number, temp: any }>();
+
+// export async function sendandReply(req: Request, res: Response) {
+//     const from = req.body.From;         // WhatsApp number
+//     const to = req.body.To;             // Twilio number
+//     const message = req.body.Body?.trim().toLowerCase(); // Convert to lowercase for easier matching
+//     const now = new Date();
+
+//     const Account_SID = process.env.ACCOUNT_SID as string;
+//     const Auth_TOKEN = process.env.AUTH_TOKEN as string;
+//     const client = twilio(Account_SID, Auth_TOKEN);
+
+//     const pool = await mssql.connect(sqlConfig);
+//     let responseMessage = "";
+
+//     // Check if the message is a greeting (e.g., "hello", "hi", etc.)
+//     const greetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon"];
+//     const isGreeting = greetings.some(greet => message.includes(greet));
+
+//     try {
+//         // 1. Check if user has an active session (based on phone number)
+//         const sessionCheck = await (await pool.request()
+//             .input("Username", from)
+//             .execute("GetAllRecords")).recordset;
+//             console.log(sessionCheck);
+            
+//         const sessionValid = sessionCheck.length > 0 &&
+//             now < new Date(sessionCheck[0].CreatedAt.getTime() + 60 * 60 * 1000);
+
+//         if (sessionValid) {
+//             // ✅ Already logged in — get chatbot response
+//             const response = await getChatResponse(message, from);
+//             responseMessage = response;
+//         } else {
+//             // ❌ Not logged in — start login process
+//             const session = loginSteps.get(from) || { step: 1, temp: {} };
+
+//             // Start the login process if the user is not logged in
+//             if (session.step === 1 || isGreeting) {
+//                 responseMessage = "Hello! Please log in by providing your email.";
+//                 loginSteps.set(from, { step: 2, temp: {} });
+//             } else if (session.step === 2) {
+//                 session.temp.email = message;
+//                 session.step = 3;
+//                 loginSteps.set(from, session);
+//                 responseMessage = "What is your password?";
+//             } else if (session.step === 3) {
+//                 const { email } = session.temp;
+//                 const password = message;
+//                 console.log(session);
+                
+//                 var isLoggedIn= await loginUser(email,password)
+
+//                 if (isLoggedIn) {
+//                     // ✅ Valid: store session against phone number
+//                     await pool.request()
+//                         .input("Username", email)  // phone number
+//                         .execute("CreateOrUpdateUserSession");
+
+//                     loginSteps.delete(from);
+//                     responseMessage = `Welcome ${email}, you're now logged in! You can now interact with the chatbot.`;
+//                 } else {
+//                     loginSteps.delete(from);
+//                     responseMessage = "Invalid credentials. Please start again.";
+//                 }
+//             }
+//         }
+
+//         // ✅ Send WhatsApp reply
+//         await client.messages.create({
+//             from: to,
+//             to: from,
+//             body: responseMessage
+//         });
+
+//         await insertToDB(message, responseMessage, "Whatsapp", from);
+//         console.log(`Replied to ${from}`);
+//     } catch (err) {
+//         console.error("Error:", err);
+//     }
+
+//     res.send("<Response></Response>");
+// }
 
