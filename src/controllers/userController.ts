@@ -41,7 +41,7 @@ export async function createAdmin(req:Request, res:Response){
 }
 export async function addUser(req:Request, res:Response){
     try {
-        const {firstName, lastName, email, password,companyId}= req.body
+        const {firstName, lastName, email, password,companyId,occupation}= req.body
         const hashedPassword= await bcrypt.hash(password,10)
         const pool = await mssql.connect(sqlConfig)
         const user =await(await pool.request()
@@ -58,6 +58,7 @@ export async function addUser(req:Request, res:Response){
         .input("Password", hashedPassword)
         .input("Role", "user")
         .input("CompanyId", companyId)
+        .input("Occupation",occupation)
         .execute("AddUser")
 
         return res.status(201).json({message:"user added"})

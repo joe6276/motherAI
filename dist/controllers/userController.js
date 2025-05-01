@@ -54,7 +54,7 @@ function createAdmin(req, res) {
 function addUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { firstName, lastName, email, password, companyId } = req.body;
+            const { firstName, lastName, email, password, companyId, occupation } = req.body;
             const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
             const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
             const user = yield (yield pool.request()
@@ -70,6 +70,7 @@ function addUser(req, res) {
                 .input("Password", hashedPassword)
                 .input("Role", "user")
                 .input("CompanyId", companyId)
+                .input("Occupation", occupation)
                 .execute("AddUser");
             return res.status(201).json({ message: "user added" });
         }
