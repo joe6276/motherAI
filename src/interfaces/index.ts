@@ -7,6 +7,7 @@ export interface User{
     Role:string
     CompanyId:number
     Occupation:string
+    Department:string
 }
 
 

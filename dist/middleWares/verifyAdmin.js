@@ -10,7 +10,7 @@ const path_1 = __importDefault(require("path"));
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../../.env') });
 function verifyAdmin(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.startsWith('Bearer ')
+    const token = authHeader && authHeader.startsWith('Bearer')
         ? authHeader.split(' ')[1]
         : null;
     try {
@@ -23,7 +23,7 @@ function verifyAdmin(req, res, next) {
         }
     }
     catch (error) {
-        res.status(403).json(error.message);
+        return res.status(403).json(error.message);
     }
     next();
 }

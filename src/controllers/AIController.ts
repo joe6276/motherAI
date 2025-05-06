@@ -6,11 +6,81 @@ const API_KEy = process.env.API_URL as string
 const API_URL = "https://api.openai.com/v1/chat/completions"
 import bcrypt from 'bcryptjs'
 import { User } from "../interfaces";
+import axios from 'axios';
+import { FaissStore } from "@langchain/community/vectorstores/faiss";
+import { ChatOpenAI } from '@langchain/openai';
+import { loadQAStuffChain } from "langchain/chains";
+import xlsx from 'xlsx';
+import { OpenAIEmbeddings } from '@langchain/openai';
+import { CharacterTextSplitter } from "langchain/text_splitter";
 
 interface Users {
     role: string
     content: string
 }
+
+
+async function chatWithFinanceBot(fileUrl:string) {
+    const openAIApiKey = API_KEy
+    const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+    const data = response.data;
+
+  // 2. Parse the workbook
+  const workbook = xlsx.read(data, { type: 'buffer' });
+  const sheetNames = workbook.SheetNames;
+
+  let raw_text = "";
+
+  sheetNames.forEach(sheetName => {
+    const sheet = workbook.Sheets[sheetName];
+    const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+    raw_text += `\n=== Sheet: ${sheetName} ===\n`;
+    rows.forEach((row: any) => {
+      raw_text += row.join(" ") + "\n";
+    });
+  });
+
+  // 3. Split text
+  const textSplitter = new CharacterTextSplitter({
+    separator: "\n",
+    chunkSize: 1000,
+    chunkOverlap: 200,
+    lengthFunction: (text) => text.length
+  });
+
+  const texts = await textSplitter.splitText(raw_text);
+
+  // 4. Generate embeddings
+  const documentSearch = await FaissStore.fromTexts(texts, {}, new OpenAIEmbeddings({ openAIApiKey }));
+
+  // 5. Perform search
+  const query = "What is the total expense?";
+  const resultOne = await documentSearch.similaritySearch(query, 1);
+
+  // 6. QA Chain with system message
+  const llm = new ChatOpenAI({
+    openAIApiKey,
+    model: "gpt-3.5-turbo",
+    temperature: 0.9,
+    prefixMessages: [
+      {
+        role: "system",
+        content: "You are a helpful financial assistant. Use the provided documents to answer questions accurately and concisely."
+      }
+    ]
+  });
+
+  const chain = loadQAStuffChain(llm);
+  const result = await chain.call({
+    input_documents: resultOne,
+    question: query
+  });
+console.log(result);
+
+return result.text as string
+}
+
+
 
 export async function getChatResponse(message: string, userId: string) {
     const pool = await mssql.connect(sqlConfig)
@@ -205,18 +275,22 @@ export async function getOccupation(email:string){
     const pool = await mssql.connect(sqlConfig)
     const user =await(await pool.request()
     .input("Email", email)
-    .execute("getUserByEmail")).recordset as User[]
-   
-  
-   
-    if(  user.length==0){
-        return "No occupation yet"
-        
-    }else{
-        
-        return user[0].Occupation
-    }
+    .execute("getUserByEmail")).recordset as User[]   
+        return user  
 }
+
+export async function getDocument(companyId:number){    
+    const pool = await mssql.connect(sqlConfig)
+    const document =await(await pool.request()
+    .input("CompanyId", companyId)
+    .input("Department", "Finance")
+    .execute("GetDocuments")).recordset  
+    
+    console.log(document)
+    return document[0] 
+}
+
+
 const loginSteps = new Map<string, { step: number, temp: any }>();
 
 export async function sendandReply(req: Request, res: Response) {
@@ -257,10 +331,22 @@ export async function sendandReply(req: Request, res: Response) {
         } else {
             // Step 4: Already authenticated
             console.log("here" , session.temp?.email);
-            const occupation = await getOccupation(session.temp?.email)
-            console.log(occupation)
-            const response = await getChatResponse1(message, from,   occupation );
-            responseMessage = response;
+            const userres = await getOccupation(session.temp?.email)
+            console.log(userres)
+
+            let responseMessage=""
+                if(userres[0].Department.toLowerCase() === "Finance".toLowerCase()){
+                    const document = await getDocument(userres[0].CompanyId)
+
+                    console.log(document);
+                    
+                    responseMessage = await chatWithFinanceBot(document)
+                    console.log(responseMessage);
+                }else{
+                    const response = await getChatResponse1(message, from,   userres[0].Occupation );
+                    responseMessage = response;
+                }
+          
         }
 
         await client.messages.create({

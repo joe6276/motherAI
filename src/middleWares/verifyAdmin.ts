@@ -10,22 +10,22 @@ export function verifyAdmin(req:Request, res:Response, next:NextFunction){
     const authHeader = req.headers['authorization'];
    
     
-    const token = authHeader && authHeader.startsWith('Bearer ')
+    const token = authHeader && authHeader.startsWith('Bearer')
       ? authHeader.split(' ')[1]
       : null;
-      
       try {
         if(!token){
             return res.status(401).json({error:'Forbidden'})
         }
 
         const payloaddata= jwt.verify(token, process.env.SECRET as string ) as DecodedData
+         
             
         if(payloaddata.role.toLocaleLowerCase() !=='admin'.toLocaleLowerCase()){
             return res.status(401).json({error:'Forbidden'})
         }
       } catch (error:any) {
-        res.status(403).json(error.message)
+        return res.status(403).json(error.message)
       }
       
       next()

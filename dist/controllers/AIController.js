@@ -20,6 +20,7 @@ exports.aiChat = aiChat;
 exports.getRecords = getRecords;
 exports.loginUserBot = loginUserBot;
 exports.getOccupation = getOccupation;
+exports.getDocument = getDocument;
 exports.sendandReply = sendandReply;
 const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
@@ -27,6 +28,64 @@ const Config_1 = require("../Config");
 const API_KEy = process.env.API_URL;
 const API_URL = "https://api.openai.com/v1/chat/completions";
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const axios_1 = __importDefault(require("axios"));
+const faiss_1 = require("@langchain/community/vectorstores/faiss");
+const openai_1 = require("@langchain/openai");
+const chains_1 = require("langchain/chains");
+const xlsx_1 = __importDefault(require("xlsx"));
+const openai_2 = require("@langchain/openai");
+const text_splitter_1 = require("langchain/text_splitter");
+function chatWithFinanceBot(fileUrl) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const openAIApiKey = API_KEy;
+        const response = yield axios_1.default.get(fileUrl, { responseType: 'arraybuffer' });
+        const data = response.data;
+        // 2. Parse the workbook
+        const workbook = xlsx_1.default.read(data, { type: 'buffer' });
+        const sheetNames = workbook.SheetNames;
+        let raw_text = "";
+        sheetNames.forEach(sheetName => {
+            const sheet = workbook.Sheets[sheetName];
+            const rows = xlsx_1.default.utils.sheet_to_json(sheet, { header: 1 });
+            raw_text += `\n=== Sheet: ${sheetName} ===\n`;
+            rows.forEach((row) => {
+                raw_text += row.join(" ") + "\n";
+            });
+        });
+        // 3. Split text
+        const textSplitter = new text_splitter_1.CharacterTextSplitter({
+            separator: "\n",
+            chunkSize: 1000,
+            chunkOverlap: 200,
+            lengthFunction: (text) => text.length
+        });
+        const texts = yield textSplitter.splitText(raw_text);
+        // 4. Generate embeddings
+        const documentSearch = yield faiss_1.FaissStore.fromTexts(texts, {}, new openai_2.OpenAIEmbeddings({ openAIApiKey }));
+        // 5. Perform search
+        const query = "What is the total expense?";
+        const resultOne = yield documentSearch.similaritySearch(query, 1);
+        // 6. QA Chain with system message
+        const llm = new openai_1.ChatOpenAI({
+            openAIApiKey,
+            model: "gpt-3.5-turbo",
+            temperature: 0.9,
+            prefixMessages: [
+                {
+                    role: "system",
+                    content: "You are a helpful financial assistant. Use the provided documents to answer questions accurately and concisely."
+                }
+            ]
+        });
+        const chain = (0, chains_1.loadQAStuffChain)(llm);
+        const result = yield chain.call({
+            input_documents: resultOne,
+            question: query
+        });
+        console.log(result);
+        return result.text;
+    });
+}
 function getChatResponse(message, userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
@@ -194,12 +253,18 @@ function getOccupation(email) {
         const user = yield (yield pool.request()
             .input("Email", email)
             .execute("getUserByEmail")).recordset;
-        if (user.length == 0) {
-            return "No occupation yet";
-        }
-        else {
-            return user[0].Occupation;
-        }
+        return user;
+    });
+}
+function getDocument(companyId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        const document = yield (yield pool.request()
+            .input("CompanyId", companyId)
+            .input("Department", "Finance")
+            .execute("GetDocuments")).recordset;
+        console.log(document);
+        return document[0];
     });
 }
 const loginSteps = new Map();
@@ -242,10 +307,19 @@ function sendandReply(req, res) {
             else {
                 // Step 4: Already authenticated
                 console.log("here", (_b = session.temp) === null || _b === void 0 ? void 0 : _b.email);
-                const occupation = yield getOccupation((_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
-                console.log(occupation);
-                const response = yield getChatResponse1(message, from, occupation);
-                responseMessage = response;
+                const userres = yield getOccupation((_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
+                console.log(userres);
+                let responseMessage = "";
+                if (userres[0].Department.toLowerCase() === "Finance".toLowerCase()) {
+                    const document = yield getDocument(userres[0].CompanyId);
+                    console.log(document);
+                    responseMessage = yield chatWithFinanceBot(document);
+                    console.log(responseMessage);
+                }
+                else {
+                    const response = yield getChatResponse1(message, from, userres[0].Occupation);
+                    responseMessage = response;
+                }
             }
             yield client.messages.create({
                 from: to,

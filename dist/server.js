@@ -42,6 +42,7 @@ require("./controllers/telegramBot");
 const cors_1 = __importDefault(require("cors"));
 const companyRoutes_1 = __importDefault(require("./Routes/companyRoutes"));
 const userRoutes_1 = __importDefault(require("./Routes/userRoutes"));
+const blobRoutes_1 = __importDefault(require("./Routes/blobRoutes"));
 const app = (0, express_1.default)();
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, express_1.json)());
@@ -49,6 +50,7 @@ app.use((0, cors_1.default)());
 app.use('/aiChat', AIRoutes_1.default);
 app.use("/users", userRoutes_1.default);
 app.use("/companies", companyRoutes_1.default);
+app.use("/file", blobRoutes_1.default);
 app.use("/test", (req, res) => {
     res.status(200).send("<h1> Hello There</h1>");
 });

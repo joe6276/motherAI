@@ -14,7 +14,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 export async function createAdmin(req:Request, res:Response){
     try {
-        const {firstName, lastName, email, password,companyId,occupation}= req.body
+        const {firstName, lastName, email, password,companyId,occupation,Department}= req.body
+     
         const hashedPassword= await bcrypt.hash(password,10)
         const pool = await mssql.connect(sqlConfig)
         const user =await(await pool.request()
@@ -24,6 +25,7 @@ export async function createAdmin(req:Request, res:Response){
         if(user.length!=0){
             return res.status(400).json({message:"Email Already Exists!"})
         }
+
         await pool.request()
         .input("FirstName", firstName)
         .input("LastName", lastName)
@@ -32,6 +34,7 @@ export async function createAdmin(req:Request, res:Response){
         .input("Role", "admin")
         .input("CompanyId", companyId)
         .input("Occupation",occupation)
+        .input("Department", Department)
         .execute("AddUser")
 
         return res.status(201).json({message:"user added"})
@@ -41,13 +44,15 @@ export async function createAdmin(req:Request, res:Response){
 }
 export async function addUser(req:Request, res:Response){
     try {
-        const {firstName, lastName, email, password,companyId,occupation}= req.body
+        const {firstName, lastName, email, password,companyId,occupation,Department}= req.body
+       
         const hashedPassword= await bcrypt.hash(password,10)
         const pool = await mssql.connect(sqlConfig)
+
         const user =await(await pool.request()
         .input("Email", email)
         .execute("getUserByEmail")).recordset
-       
+    
         if(user.length!=0){
             return res.status(400).json({message:"Email Already Exists!"})
         }
@@ -59,7 +64,9 @@ export async function addUser(req:Request, res:Response){
         .input("Role", "user")
         .input("CompanyId", companyId)
         .input("Occupation",occupation)
+        .input("Department", Department)
         .execute("AddUser")
+
 
         return res.status(201).json({message:"user added"})
     } catch (error) {

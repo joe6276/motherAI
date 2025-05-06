@@ -14,6 +14,7 @@ CREATE TABLE Records (
     channel VARCHAR(200),
     status VARCHAR(200),
     UserId VARCHAR(200),
+   
     output TEXT,
     Timestamp DATETIME DEFAULT GETDATE()
 );
@@ -24,7 +25,7 @@ CREATE OR ALTER PROCEDURE InsertRecord
     @channel VARCHAR(200),
     @status VARCHAR(200),
     @output TEXT,
-    @UserId VARCHAR(200)
+    @UserId VARCHAR(200),
 AS
 BEGIN
     INSERT INTO Records (originalCommand, parsedTask, channel, status, output,UserId)
@@ -65,13 +66,14 @@ CREATE TABLE Users (
     Password VARCHAR(255) NOT NULL,
     Role VARCHAR(50) DEFAULT 'Employee',
     CompanyId INT,
+   
     Occupation VARCHAR()
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (CompanyId) REFERENCES Company(Id)
 );
 
 ALTER TABLE Users
-ADD Occupation VARCHAR(200);
+ADD   Department VARCHAR(255);
 
 
 CREATE PROCEDURE AddCompany
@@ -98,11 +100,12 @@ CREATE OR ALTER PROCEDURE AddUser
     @Password VARCHAR(255),
     @Role VARCHAR(50),
     @CompanyId INT,
-    @Occupation VARCHAR(200)
+    @Occupation VARCHAR(200),
+    @Department VARCHAR(255)
 AS
 BEGIN
-    INSERT INTO Users (FirstName, LastName, Email, Password, Role, CompanyId, Occupation)
-    VALUES (@FirstName, @LastName, @Email, @Password, @Role, @CompanyId, @Occupation);
+    INSERT INTO Users (FirstName, LastName, Email, Password, Role, CompanyId, Occupation,  Department)
+    VALUES (@FirstName, @LastName, @Email, @Password, @Role, @CompanyId, @Occupation, @Department);
 END
 
 
@@ -139,7 +142,8 @@ CREATE OR ALTER PROCEDURE UpdateUser
     @Password VARCHAR(255),
     @Role VARCHAR(50),
     @CompanyId INT,
-    @Occupation VARCHAR(200)
+    @Occupation VARCHAR(200),
+    @Department VARCHAR(255)
 AS
 BEGIN
     UPDATE Users
@@ -150,7 +154,8 @@ BEGIN
         Password = @Password,
         Role = @Role,
         CompanyId = @CompanyId,
-        Occupation=@Occupation
+        Occupation=@Occupation,
+        Department= @Department
 
     WHERE Id = @UserId;
 END
@@ -173,7 +178,7 @@ SELECT FirstName,LastName,Email  FROM Users WHERE CompanyId=@CompanyId AND Role 
 
 END
 
-CREATE PROCEDURE  getUserByEmail(@Email VARCHAR(150))
+CREATE OR ALTER PROCEDURE  getUserByEmail(@Email VARCHAR(150))
 AS
 BEGIN
  SELECT * FROM Users WHERE Email = @Email
@@ -229,3 +234,37 @@ BEGIN
     FROM userSessions
     WHERE Username = @Username
 END
+
+
+
+CREATE Table Documents (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    CompanyId INT,
+    Department VARCHAR(255),
+    DocumentURL VARCHAR(255),
+    FOREIGN KEY (CompanyId) REFERENCES Company(Id)
+)
+
+CREATE OR ALTER PROCEDURE addDocument(
+    @CompanyId INT,
+    @Department VARCHAR(255),
+    @DocumentURL VARCHAR(255)
+)
+AS
+BEGIN
+
+INSERT INTO Documents(CompanyId, Department, DocumentURL)
+VALUES(@CompanyId,@Department, @DocumentURL)
+END
+
+
+
+CREATE OR ALTER PROCEDURE GetDocuments(
+    @CompanyId INT,
+    @Department VARCHAR(255)
+)
+AS
+BEGIN
+SELECT DocumentURL FROM Documents WHERE CompanyId=@CompanyId AND Department= @Department
+END
+
