@@ -20,7 +20,7 @@ interface Users {
 }
 
 
-async function chatWithFinanceBot(fileUrl:string) {
+async function chatWithFinanceBot(fileUrl:string, query:string) {
     const openAIApiKey = API_KEy
     const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
     const data = response.data;
@@ -55,7 +55,7 @@ async function chatWithFinanceBot(fileUrl:string) {
   const documentSearch = await FaissStore.fromTexts(texts, {}, new OpenAIEmbeddings({ openAIApiKey }));
 
   // 5. Perform search
-  const query = "What is the total expense?";
+
   const resultOne = await documentSearch.similaritySearch(query, 1);
 
   // 6. QA Chain with system message
@@ -337,7 +337,7 @@ export async function sendandReply(req: Request, res: Response) {
             let responseMessage=""
                 if(userres[0].Department.toLowerCase() === "Finance".toLowerCase()){
                     const document = await getDocument(userres[0].CompanyId)
-                    responseMessage = await chatWithFinanceBot(document.DocumentURL)
+                    responseMessage = await chatWithFinanceBot(document.DocumentURL, message)
                     console.log("Respones" ,responseMessage);
                     await client.messages.create({
                         from: to,

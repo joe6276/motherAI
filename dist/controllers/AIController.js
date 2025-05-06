@@ -35,7 +35,7 @@ const chains_1 = require("langchain/chains");
 const xlsx_1 = __importDefault(require("xlsx"));
 const openai_2 = require("@langchain/openai");
 const text_splitter_1 = require("langchain/text_splitter");
-function chatWithFinanceBot(fileUrl) {
+function chatWithFinanceBot(fileUrl, query) {
     return __awaiter(this, void 0, void 0, function* () {
         const openAIApiKey = API_KEy;
         const response = yield axios_1.default.get(fileUrl, { responseType: 'arraybuffer' });
@@ -63,7 +63,6 @@ function chatWithFinanceBot(fileUrl) {
         // 4. Generate embeddings
         const documentSearch = yield faiss_1.FaissStore.fromTexts(texts, {}, new openai_2.OpenAIEmbeddings({ openAIApiKey }));
         // 5. Perform search
-        const query = "What is the total expense?";
         const resultOne = yield documentSearch.similaritySearch(query, 1);
         // 6. QA Chain with system message
         const llm = new openai_1.ChatOpenAI({
@@ -311,7 +310,7 @@ function sendandReply(req, res) {
                 let responseMessage = "";
                 if (userres[0].Department.toLowerCase() === "Finance".toLowerCase()) {
                     const document = yield getDocument(userres[0].CompanyId);
-                    responseMessage = yield chatWithFinanceBot(document.DocumentURL);
+                    responseMessage = yield chatWithFinanceBot(document.DocumentURL, message);
                     console.log("Respones", responseMessage);
                     yield client.messages.create({
                         from: to,
