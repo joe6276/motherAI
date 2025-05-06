@@ -47,12 +47,10 @@ bot.on('message', async (msg) => {
             // Authenticated: Chatbot mode
             await bot.sendChatAction(chatId, 'typing');
             console.log("here" , session.temp?.email);
-           const userRes = await getOccupation(session.temp?.email)
-           console.log(userRes);
-           
+           const userRes=  await getOccupation(session.temp?.email)
+       
            if (userRes[0].Department.toLowerCase() === "finance") {
             const document = await getDocument(userRes[0].CompanyId);
-            console.log(document);
             const botReply = await chatWithFinanceBot(document.DocumentURL, userMessage as string);
             responseMessage = botReply;
         } else {
@@ -60,14 +58,10 @@ bot.on('message', async (msg) => {
             responseMessage = botReply;
             await insertToDB(userMessage as string, botReply, "Telegram", username);
         }
-        console.log(responseMessage);
-        // Send the final response once
-        await bot.sendMessage(chatId, responseMessage);
-        
         }
 
         // Send response
-   
+        await bot.sendMessage(chatId, responseMessage);
 
     } catch (error) {
         console.error("Error in Telegram bot:", error);
