@@ -16,6 +16,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../../.env') });
 const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
+const AIController_1 = require("./AIController");
 const bot = new node_telegram_bot_api_1.default(process.env.TElEGRAM, { polling: true });
 const loginSteps = new Map();
 bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
@@ -59,74 +60,18 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
             const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
-            import dotenv from 'dotenv';
-            import path from 'path';
-            dotenv_2.default.config({ path: path_2.default.resolve(__dirname, '../../.env') });
-            import TelegramBot from 'node-telegram-bot-api';
-            import { chatWithFinanceBot, getChatResponse2, getDocument, getOccupation, insertToDB, loginUserBot } from './AIController';
-            const bot = new node_telegram_bot_api_2.default(process.env.TElEGRAM, { polling: true });
-            const loginSteps = new Map();
-            bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
-                var _a, _b, _c, _d;
-                const chatId = msg.chat.id;
-                const userMessage = (_a = msg.text) === null || _a === void 0 ? void 0 : _a.trim();
-                const username = ((_b = msg.from) === null || _b === void 0 ? void 0 : _b.username) || chatId.toString();
-                let responseMessage = "";
-                let result;
-                try {
-                    const session = loginSteps.get(chatId) || { step: 1, temp: {} };
-                    if (session.step === 1) {
-                        responseMessage = "👋 Welcome! Please enter your email to log in.";
-                        session.step = 2;
-                        loginSteps.set(chatId, session);
-                    }
-                    else if (session.step === 2) {
-                        session.temp.email = userMessage;
-                        session.step = 3;
-                        loginSteps.set(chatId, session);
-                        responseMessage = "🔐 Now enter your password.";
-                    }
-                    else if (session.step === 3) {
-                        const { email } = session.temp;
-                        const password = userMessage;
-                        const isloginValid = yield (0, AIController_1.loginUserBot)(email, password);
-                        result = isloginValid;
-                        console.log(result);
-                        if (isloginValid.islogged) {
-                            session.step = 4;
-                            loginSteps.set(chatId, session);
-                            responseMessage = `✅ Login successful, ${email}. You can now chat with the bot.`;
-                        }
-                        else {
-                            loginSteps.delete(chatId);
-                            responseMessage = "❌ Invalid credentials. Please enter your email again to start over.";
-                        }
-                    }
-                    else {
-                        // Authenticated: Chatbot mode
-                        yield bot.sendChatAction(chatId, 'typing');
-                        console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
-                        const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
-                        if (userRes[0].Department.toLowerCase() === "finance") {
-                            const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
-                            const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
-                            responseMessage = botReply;
-                        }
-                        else {
-                            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
-                            responseMessage = botReply;
-                            yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
-                        }
-                        // Send the final response once
-                        yield bot.sendMessage(chatId, responseMessage);
-                    }
-                    // Send response
-                }
-                catch (error) {
-                    console.error("Error in Telegram bot:", error);
-                    yield bot.sendMessage(chatId, "⚠️ Something went wrong. Please try again.");
-                }
-            }));
+            if (userRes[0].Department.toLowerCase() === "finance") {
+                const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
+                const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
+                responseMessage = botReply;
+            }
+            else {
+                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
+                responseMessage = botReply;
+                yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
+            }
+            // Send the final response once
+            yield bot.sendMessage(chatId, responseMessage);
         }
         // Send response
     }
