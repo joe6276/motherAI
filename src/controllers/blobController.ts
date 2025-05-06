@@ -5,7 +5,7 @@ import multer from "multer";
 import mssql from 'mssql'
 import { sqlConfig } from "../Config";
 
-const connectionString =  "DefaultEndpointsProtocol=https;AccountName=garageimages;AccountKey=gPuxf+12tvDahbJEg82cw6vVxEogirYUQlRixxOkg6JjM2nvPUnO02J84KYixdF7kGNKKqj8Ct+V+AStUDmSJA==;EndpointSuffix=core.windows.net";
+const connectionString = process.env.AZURE_BLOB as string
 const containerName = "imageuploads";
 
 

@@ -17,7 +17,7 @@ const storage_blob_1 = require("@azure/storage-blob");
 const uuid_1 = require("uuid");
 const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
-const connectionString = "DefaultEndpointsProtocol=https;AccountName=garageimages;AccountKey=gPuxf+12tvDahbJEg82cw6vVxEogirYUQlRixxOkg6JjM2nvPUnO02J84KYixdF7kGNKKqj8Ct+V+AStUDmSJA==;EndpointSuffix=core.windows.net";
+const connectionString = process.env.AZURE_BLOB;
 const containerName = "imageuploads";
 function addFile(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
