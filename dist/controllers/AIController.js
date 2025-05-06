@@ -124,11 +124,10 @@ function getChatResponse(message, userId) {
 }
 function getChatResponse2(message, occupation) {
     return __awaiter(this, void 0, void 0, function* () {
-        const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
+        // const pool = await mssql.connect(sqlConfig)
         const messages = [{
                 role: 'system', content: `
-        You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-        also Kindly advise based on User profession which is ${occupation}
+        You an Experienced Assistant, Kindly advise based on User profession which is ${occupation}
     `
             }];
         console.log(messages);

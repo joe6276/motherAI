@@ -130,12 +130,11 @@ export async function getChatResponse(message: string, userId: string) {
 
 
 export async function getChatResponse2(message: string,occupation:string) {
-    const pool = await mssql.connect(sqlConfig)
+    // const pool = await mssql.connect(sqlConfig)
     
     const messages: Users[] = [{
         role: 'system', content: `
-        You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-        also Kindly advise based on User profession which is ${occupation}
+        You an Experienced Assistant, Kindly advise based on User profession which is ${occupation}
     `}]
 
     console.log(messages);
