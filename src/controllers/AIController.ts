@@ -61,7 +61,7 @@ export async function chatWithFinanceBot(fileUrl:string, query:string) {
   // 6. QA Chain with system message
   const llm = new ChatOpenAI({
     openAIApiKey,
-    model: "gpt-3.5-turbo",
+    model: "GPT-4o",
     temperature: 0.9,
     prefixMessages: [
       {
@@ -91,8 +91,7 @@ export async function getChatResponse(message: string, userId: string) {
 
     const messages: Users[] = [{
         role: 'system', content: `
-        You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
-        also Kindly advise based on User profession which is ${occupation[0].Occupation}
+        You an Experienced Assistant, Kindly advise based on User profession which is ${occupation[0].Occupation}
     `}]
 
 
