@@ -48,7 +48,8 @@ bot.on('message', async (msg) => {
             await bot.sendChatAction(chatId, 'typing');
             console.log("here" , session.temp?.email);
            const occupation = await getOccupation(session.temp?.email)
-        
+            console.log(occupation);
+            
             const botReply = await getChatResponse2(userMessage as string ,occupation[0].Occupation );
             responseMessage = botReply;
 

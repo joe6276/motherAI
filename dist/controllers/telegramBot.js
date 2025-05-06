@@ -60,6 +60,7 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
             const occupation = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
+            console.log(occupation);
             const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, occupation[0].Occupation);
             responseMessage = botReply;
             // Store conversation
