@@ -50,8 +50,7 @@ async function chatWithFinanceBot(fileUrl:string) {
 
   const texts = await textSplitter.splitText(raw_text);
 
-  console.log(texts);
-  
+ 
   // 4. Generate embeddings
   const documentSearch = await FaissStore.fromTexts(texts, {}, new OpenAIEmbeddings({ openAIApiKey }));
 
@@ -77,7 +76,7 @@ async function chatWithFinanceBot(fileUrl:string) {
     input_documents: resultOne,
     question: query
   });
-console.log(result);
+console.log("Result",result);
 
 return result.text as string
 }
@@ -93,8 +92,6 @@ export async function getChatResponse(message: string, userId: string) {
         You an Experienced Marketter with alot of experience in the field .You work is to answer any marketing question asked in a simple way.
         also Kindly advise based on User profession which is ${occupation[0].Occupation}
     `}]
-
-    console.log(messages);
 
 
     const history = await (await pool.request().input("UserId", userId).execute("GetUserRecords")).recordset
@@ -287,8 +284,7 @@ export async function getDocument(companyId:number){
     .input("CompanyId", companyId)
     .input("Department", "Finance")
     .execute("GetDocuments")).recordset  
-    
-    console.log(document)
+
     return document[0] 
 }
 
@@ -340,14 +336,17 @@ export async function sendandReply(req: Request, res: Response) {
                 if(userres[0].Department.toLowerCase() === "Finance".toLowerCase()){
                     const document = await getDocument(userres[0].CompanyId)
 
-                    console.log(document);
+                
                     
                     responseMessage = await chatWithFinanceBot(document.DocumentURL)
-                    console.log(responseMessage);
+                    console.log("Respones" ,responseMessage);
                 }else{
                     const response = await getChatResponse1(message, from,   userres[0].Occupation );
                     responseMessage = response;
                 }
+
+                console.log(responseMessage);
+                
           
         }
 

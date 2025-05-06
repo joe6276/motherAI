@@ -60,7 +60,6 @@ function chatWithFinanceBot(fileUrl) {
             lengthFunction: (text) => text.length
         });
         const texts = yield textSplitter.splitText(raw_text);
-        console.log(texts);
         // 4. Generate embeddings
         const documentSearch = yield faiss_1.FaissStore.fromTexts(texts, {}, new openai_2.OpenAIEmbeddings({ openAIApiKey }));
         // 5. Perform search
@@ -83,7 +82,7 @@ function chatWithFinanceBot(fileUrl) {
             input_documents: resultOne,
             question: query
         });
-        console.log(result);
+        console.log("Result", result);
         return result.text;
     });
 }
@@ -97,7 +96,6 @@ function getChatResponse(message, userId) {
         also Kindly advise based on User profession which is ${occupation[0].Occupation}
     `
             }];
-        console.log(messages);
         const history = yield (yield pool.request().input("UserId", userId).execute("GetUserRecords")).recordset;
         if (history.length) {
             history.forEach(element => {
@@ -264,7 +262,6 @@ function getDocument(companyId) {
             .input("CompanyId", companyId)
             .input("Department", "Finance")
             .execute("GetDocuments")).recordset;
-        console.log(document);
         return document[0];
     });
 }
@@ -313,14 +310,14 @@ function sendandReply(req, res) {
                 let responseMessage = "";
                 if (userres[0].Department.toLowerCase() === "Finance".toLowerCase()) {
                     const document = yield getDocument(userres[0].CompanyId);
-                    console.log(document);
                     responseMessage = yield chatWithFinanceBot(document.DocumentURL);
-                    console.log(responseMessage);
+                    console.log("Respones", responseMessage);
                 }
                 else {
                     const response = yield getChatResponse1(message, from, userres[0].Occupation);
                     responseMessage = response;
                 }
+                console.log(responseMessage);
             }
             yield client.messages.create({
                 from: to,
