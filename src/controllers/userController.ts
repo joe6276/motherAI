@@ -14,7 +14,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 export async function createAdmin(req:Request, res:Response){
     try {
-        const {firstName, lastName, email, password,companyId,occupation,Department}= req.body
+        const {firstName, lastName, email, password,companyId,occupation,department}= req.body
      
         const hashedPassword= await bcrypt.hash(password,10)
         const pool = await mssql.connect(sqlConfig)
@@ -34,7 +34,7 @@ export async function createAdmin(req:Request, res:Response){
         .input("Role", "admin")
         .input("CompanyId", companyId)
         .input("Occupation",occupation)
-        .input("Department", Department)
+        .input("Department", department)
         .execute("AddUser")
 
         return res.status(201).json({message:"user added"})

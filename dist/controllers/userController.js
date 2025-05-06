@@ -26,7 +26,7 @@ dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../../.env') 
 function createAdmin(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { firstName, lastName, email, password, companyId, occupation, Department } = req.body;
+            const { firstName, lastName, email, password, companyId, occupation, department } = req.body;
             const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
             const pool = yield mssql_1.default.connect(Config_1.sqlConfig);
             const user = yield (yield pool.request()
@@ -43,7 +43,7 @@ function createAdmin(req, res) {
                 .input("Role", "admin")
                 .input("CompanyId", companyId)
                 .input("Occupation", occupation)
-                .input("Department", Department)
+                .input("Department", department)
                 .execute("AddUser");
             return res.status(201).json({ message: "user added" });
         }
