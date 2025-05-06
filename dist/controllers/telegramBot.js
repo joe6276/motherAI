@@ -59,18 +59,11 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             // Authenticated: Chatbot mode
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
-            const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
-            if (userRes[0].Department.toLowerCase() === "finance") {
-                const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
-                const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
-                responseMessage = botReply;
-            }
-            else {
-                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
-                responseMessage = botReply;
-                yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
-            }
+            const occupation = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
+            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, occupation[0].Occupation);
+            responseMessage = botReply;
             // Store conversation
+            yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
         }
         // Send response
         yield bot.sendMessage(chatId, responseMessage);
