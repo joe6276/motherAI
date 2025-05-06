@@ -64,16 +64,15 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
                 const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
                 responseMessage = botReply;
+                yield bot.sendMessage(chatId, responseMessage);
             }
             else {
                 const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
                 responseMessage = botReply;
                 yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
+                yield bot.sendMessage(chatId, responseMessage);
             }
-            // Store conversation
         }
-        // Send response
-        yield bot.sendMessage(chatId, responseMessage);
     }
     catch (error) {
         console.error("Error in Telegram bot:", error);

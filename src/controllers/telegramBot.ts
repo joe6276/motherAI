@@ -53,19 +53,17 @@ bot.on('message', async (msg) => {
                     const document = await getDocument(userRes[0].CompanyId)
                     const botReply = await chatWithFinanceBot( document.DocumentURL, userMessage as string);
                     responseMessage = botReply;
+                    await bot.sendMessage(chatId, responseMessage);
                 }else{
                     const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation);
                     responseMessage = botReply;
                     await insertToDB(userMessage as string, botReply, "Telegram", username);
+                    await bot.sendMessage(chatId, responseMessage);
                 }
-     
-
-            // Store conversation
-          
         }
 
-        // Send response
-        await bot.sendMessage(chatId, responseMessage);
+       
+        
 
     } catch (error) {
         console.error("Error in Telegram bot:", error);
