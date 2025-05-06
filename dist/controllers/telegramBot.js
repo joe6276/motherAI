@@ -60,8 +60,10 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
             const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
+            console.log(userRes);
             if (userRes[0].Department.toLowerCase() === "finance") {
                 const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
+                console.log(document);
                 const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
                 responseMessage = botReply;
             }
@@ -70,6 +72,7 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 responseMessage = botReply;
                 yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
             }
+            console.log(responseMessage);
             // Send the final response once
             yield bot.sendMessage(chatId, responseMessage);
         }

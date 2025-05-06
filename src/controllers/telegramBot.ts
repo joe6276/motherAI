@@ -48,9 +48,11 @@ bot.on('message', async (msg) => {
             await bot.sendChatAction(chatId, 'typing');
             console.log("here" , session.temp?.email);
            const userRes = await getOccupation(session.temp?.email)
+           console.log(userRes);
            
            if (userRes[0].Department.toLowerCase() === "finance") {
             const document = await getDocument(userRes[0].CompanyId);
+            console.log(document);
             const botReply = await chatWithFinanceBot(document.DocumentURL, userMessage as string);
             responseMessage = botReply;
         } else {
@@ -58,7 +60,7 @@ bot.on('message', async (msg) => {
             responseMessage = botReply;
             await insertToDB(userMessage as string, botReply, "Telegram", username);
         }
-        
+        console.log(responseMessage);
         // Send the final response once
         await bot.sendMessage(chatId, responseMessage);
         
