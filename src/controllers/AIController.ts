@@ -61,7 +61,7 @@ export async function chatWithFinanceBot(fileUrl:string, query:string) {
   // 6. QA Chain with system message
   const llm = new ChatOpenAI({
     openAIApiKey,
-    model: "gpt-4.1",
+    model: "gpt-3.5-turbo",
     temperature: 0.9,
     prefixMessages: [
       {
@@ -115,7 +115,7 @@ export async function getChatResponse(message: string, userId: string) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            model: 'gpt-4.1',
+            model: 'gpt-3.5-turbo',
             messages,
             temperature: 0.9 //0-2
         })
