@@ -59,21 +59,14 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             // Authenticated: Chatbot mode
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
-            const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
-            if (userRes[0].Department.toLowerCase() === "Finance".toLowerCase()) {
-                const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
-                const financebot = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
-                yield (0, AIController_1.insertToDB)(userMessage, responseMessage, "Telegram", username);
-                yield bot.sendMessage(chatId, financebot);
-            }
-            else {
-                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
-                yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
-                responseMessage = botReply;
-                yield bot.sendMessage(chatId, botReply);
-            }
+            const occupation = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
+            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, occupation[0].Occupation);
+            responseMessage = botReply;
+            // Store conversation
+            yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
         }
         // Send response
+        yield bot.sendMessage(chatId, responseMessage);
     }
     catch (error) {
         console.error("Error in Telegram bot:", error);

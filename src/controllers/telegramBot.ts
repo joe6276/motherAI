@@ -3,7 +3,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 import TelegramBot from 'node-telegram-bot-api'
-import { chatWithFinanceBot, getChatResponse2, getDocument, getOccupation, insertToDB, loginUserBot } from './AIController';
+import {  getChatResponse2, getOccupation, insertToDB, loginUserBot } from './AIController';
 
 const bot = new TelegramBot(process.env.TElEGRAM as string, { polling: true });
 const loginSteps = new Map<number, { step: number, temp: any }>();
@@ -12,7 +12,7 @@ bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const userMessage = msg.text?.trim();
     const username = msg.from?.username || chatId.toString();
-
+    
     let responseMessage = "";
     let result;
     try {
@@ -31,10 +31,10 @@ bot.on('message', async (msg) => {
             const { email } = session.temp;
             const password = userMessage as string;
 
-            const isloginValid = await loginUserBot(email, password)
-            result = isloginValid
+           const isloginValid =await loginUserBot(email, password)
+            result=isloginValid
             console.log(result);
-
+            
             if (isloginValid.islogged) {
                 session.step = 4;
                 loginSteps.set(chatId, session);
@@ -46,25 +46,18 @@ bot.on('message', async (msg) => {
         } else {
             // Authenticated: Chatbot mode
             await bot.sendChatAction(chatId, 'typing');
-            console.log("here", session.temp?.email);
-            const userRes = await getOccupation(session.temp?.email)
+            console.log("here" , session.temp?.email);
+           const occupation = await getOccupation(session.temp?.email)
+        
+            const botReply = await getChatResponse2(userMessage as string ,occupation[0].Occupation);
+            responseMessage = botReply;
 
-            if (userRes[0].Department.toLowerCase() === "Finance".toLowerCase()) {
-                const document = await getDocument(userRes[0].CompanyId)
-                const financebot = await chatWithFinanceBot(document.DocumentURL, userMessage as string)
-                await insertToDB(userMessage as string, responseMessage, "Telegram", username);
-                await bot.sendMessage(chatId, financebot);
-            } else {
-                const botReply = await getChatResponse2(userMessage as string, userRes[0].Occupation);
-                await insertToDB(userMessage as string, botReply, "Telegram", username);
-                responseMessage = botReply;
-                await bot.sendMessage(chatId, botReply);
-            }
-
+            // Store conversation
+            await insertToDB(userMessage as string, botReply, "Telegram", username);
         }
 
         // Send response
-   
+        await bot.sendMessage(chatId, responseMessage);
 
     } catch (error) {
         console.error("Error in Telegram bot:", error);
