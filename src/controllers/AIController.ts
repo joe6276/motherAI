@@ -50,6 +50,8 @@ async function chatWithFinanceBot(fileUrl:string) {
 
   const texts = await textSplitter.splitText(raw_text);
 
+  console.log(texts);
+  
   // 4. Generate embeddings
   const documentSearch = await FaissStore.fromTexts(texts, {}, new OpenAIEmbeddings({ openAIApiKey }));
 
