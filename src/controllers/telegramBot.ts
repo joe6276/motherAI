@@ -3,7 +3,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 import TelegramBot from 'node-telegram-bot-api'
-import {  getChatResponse2, getOccupation, insertToDB, loginUserBot } from './AIController';
+import {  chatWithFinanceBot, getChatResponse2, getDocument, getOccupation, insertToDB, loginUserBot } from './AIController';
 
 const bot = new TelegramBot(process.env.TElEGRAM as string, { polling: true });
 const loginSteps = new Map<number, { step: number, temp: any }>();
@@ -47,13 +47,19 @@ bot.on('message', async (msg) => {
             // Authenticated: Chatbot mode
             await bot.sendChatAction(chatId, 'typing');
             console.log("here" , session.temp?.email);
-           const occupation = await getOccupation(session.temp?.email)
-        
-            const botReply = await getChatResponse2(userMessage as string ,occupation );
-            responseMessage = botReply;
+           const userRes = await getOccupation(session.temp?.email)
 
-            // Store conversation
+          if(userRes[0].Department.toLowerCase() === "Finance".toLowerCase()){
+         const document = await getDocument(userRes[0].CompanyId)
+         const financebot = await chatWithFinanceBot(document.DocumentURL, userMessage as string)
+         responseMessage=financebot
+         await insertToDB(userMessage as string, responseMessage, "Telegram", username);
+          }else{
+            const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
             await insertToDB(userMessage as string, botReply, "Telegram", username);
+            responseMessage = botReply;
+          }
+            
         }
 
         // Send response

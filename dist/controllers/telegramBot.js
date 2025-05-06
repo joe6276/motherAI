@@ -59,11 +59,18 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             // Authenticated: Chatbot mode
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
-            const occupation = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
-            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, occupation);
-            responseMessage = botReply;
-            // Store conversation
-            yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
+            const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
+            if (userRes[0].Department.toLowerCase() === "Finance".toLowerCase()) {
+                const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
+                const financebot = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
+                responseMessage = financebot;
+                yield (0, AIController_1.insertToDB)(userMessage, responseMessage, "Telegram", username);
+            }
+            else {
+                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
+                yield (0, AIController_1.insertToDB)(userMessage, botReply, "Telegram", username);
+                responseMessage = botReply;
+            }
         }
         // Send response
         yield bot.sendMessage(chatId, responseMessage);

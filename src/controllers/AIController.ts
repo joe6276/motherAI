@@ -20,7 +20,7 @@ interface Users {
 }
 
 
-async function chatWithFinanceBot(fileUrl:string, query:string) {
+export async function chatWithFinanceBot(fileUrl:string, query:string) {
     const openAIApiKey = API_KEy
     const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
     const data = response.data;

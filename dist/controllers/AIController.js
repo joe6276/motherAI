@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.chatWithFinanceBot = chatWithFinanceBot;
 exports.getChatResponse = getChatResponse;
 exports.getChatResponse2 = getChatResponse2;
 exports.getChatResponse1 = getChatResponse1;
