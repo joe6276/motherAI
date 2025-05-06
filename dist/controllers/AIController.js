@@ -314,7 +314,7 @@ function sendandReply(req, res) {
                 if (userres[0].Department.toLowerCase() === "Finance".toLowerCase()) {
                     const document = yield getDocument(userres[0].CompanyId);
                     console.log(document);
-                    responseMessage = yield chatWithFinanceBot(document);
+                    responseMessage = yield chatWithFinanceBot(document.DocumentURL);
                     console.log(responseMessage);
                 }
                 else {

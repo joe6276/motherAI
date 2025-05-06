@@ -342,7 +342,7 @@ export async function sendandReply(req: Request, res: Response) {
 
                     console.log(document);
                     
-                    responseMessage = await chatWithFinanceBot(document)
+                    responseMessage = await chatWithFinanceBot(document.DocumentURL)
                     console.log(responseMessage);
                 }else{
                     const response = await getChatResponse1(message, from,   userres[0].Occupation );
