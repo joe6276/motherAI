@@ -73,7 +73,9 @@ function chatWithFinanceBot(fileUrl) {
             prefixMessages: [
                 {
                     role: "system",
-                    content: "You are a helpful financial assistant. Use the provided documents to answer questions accurately and concisely."
+                    content: `You are a highly skilled financial assistant specialized in analyzing Excel spreadsheets containing financial data. Focus exclusively on finance-related information such as budgets, expenses, revenue, forecasts, balance sheets, and other financial metrics.
+        Use your strong mathematical and analytical skills to interpret and summarize the data clearly and accurately. Do not provide information outside the financial domain. If the data is incomplete or unclear, suggest performing a web search for additional financial context—do not fabricate any details.
+    Maintain precision, relevance, and clarity in all responses.`
                 }
             ]
         });
