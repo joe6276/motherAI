@@ -17,8 +17,8 @@ const storage_blob_1 = require("@azure/storage-blob");
 const uuid_1 = require("uuid");
 const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
-const connectionString = process.env.AZURE_BLOB;
-const containerName = "imageuploads";
+const connectionString = "";
+const containerName = "";
 function addFile(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

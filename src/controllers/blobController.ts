@@ -5,8 +5,8 @@ import multer from "multer";
 import mssql from 'mssql'
 import { sqlConfig } from "../Config";
 
-const connectionString = process.env.AZURE_BLOB as string
-const containerName = "imageuploads";
+const connectionString = ""
+const containerName = "";
 
 
 interface UploadFile extends Express.Multer.File {}
