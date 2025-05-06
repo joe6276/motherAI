@@ -63,7 +63,9 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             if (userRes[0].Department.toLowerCase() === "Finance".toLowerCase()) {
                 const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
                 console.log(document);
-                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
+                const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
+                console.log(botReply);
+                // const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
                 responseMessage = botReply;
             }
             // Store conversation
