@@ -82,7 +82,6 @@ function chatWithFinanceBot(fileUrl) {
             input_documents: resultOne,
             question: query
         });
-        console.log("Result", result);
         return result.text;
     });
 }
@@ -312,6 +311,11 @@ function sendandReply(req, res) {
                     const document = yield getDocument(userres[0].CompanyId);
                     responseMessage = yield chatWithFinanceBot(document.DocumentURL);
                     console.log("Respones", responseMessage);
+                    yield client.messages.create({
+                        from: to,
+                        to: from,
+                        body: responseMessage
+                    });
                 }
                 else {
                     const response = yield getChatResponse1(message, from, userres[0].Occupation);
