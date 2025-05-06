@@ -61,6 +61,7 @@ function chatWithFinanceBot(fileUrl, query) {
             lengthFunction: (text) => text.length
         });
         const texts = yield textSplitter.splitText(raw_text);
+        console.log(texts);
         // 4. Generate embeddings
         const documentSearch = yield faiss_1.FaissStore.fromTexts(texts, {}, new openai_2.OpenAIEmbeddings({ openAIApiKey }));
         // 5. Perform search
@@ -84,6 +85,7 @@ function chatWithFinanceBot(fileUrl, query) {
             input_documents: resultOne,
             question: query
         });
+        console.log(result);
         return result.text;
     });
 }

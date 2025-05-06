@@ -49,6 +49,7 @@ export async function chatWithFinanceBot(fileUrl:string, query:string) {
   });
 
   const texts = await textSplitter.splitText(raw_text);
+console.log(texts);
 
  
   // 4. Generate embeddings
@@ -78,6 +79,7 @@ export async function chatWithFinanceBot(fileUrl:string, query:string) {
     input_documents: resultOne,
     question: query
   });
+  console.log(result);
 
 
 return result.text as string
