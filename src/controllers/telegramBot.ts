@@ -58,6 +58,9 @@ bot.on('message', async (msg) => {
             // const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
             responseMessage = botReply;
           
+        }else{
+            const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
+            responseMessage = botReply;
         }
            
 

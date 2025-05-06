@@ -68,6 +68,10 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 // const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
                 responseMessage = botReply;
             }
+            else {
+                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
+                responseMessage = botReply;
+            }
             // Store conversation
             yield (0, AIController_1.insertToDB)(userMessage, responseMessage, "Telegram", username);
         }
