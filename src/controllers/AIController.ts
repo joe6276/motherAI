@@ -61,7 +61,7 @@ export async function chatWithFinanceBot(fileUrl:string, query:string) {
   // 6. QA Chain with system message
   const llm = new ChatOpenAI({
     openAIApiKey,
-    model: "GPT-4o",
+    model: "gpt-4.1",
     temperature: 0.9,
     prefixMessages: [
       {
@@ -91,7 +91,7 @@ export async function getChatResponse(message: string, userId: string) {
 
     const messages: Users[] = [{
         role: 'system', content: `
-        You an Experienced Assistant, Kindly advise based on User profession which is ${occupation[0].Occupation}
+        You an Experienced Assistant Kindly advise based on User profession which is ${occupation[0].Occupation}
     `}]
 
 
@@ -115,7 +115,7 @@ export async function getChatResponse(message: string, userId: string) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4.1',
             messages,
             temperature: 0.9 //0-2
         })

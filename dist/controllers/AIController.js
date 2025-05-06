@@ -68,7 +68,7 @@ function chatWithFinanceBot(fileUrl, query) {
         // 6. QA Chain with system message
         const llm = new openai_1.ChatOpenAI({
             openAIApiKey,
-            model: "GPT-4o",
+            model: "gpt-4.1",
             temperature: 0.9,
             prefixMessages: [
                 {
@@ -93,7 +93,7 @@ function getChatResponse(message, userId) {
         const occupation = yield (yield pool.request().input("Id", userId).execute("getUserById")).recordset;
         const messages = [{
                 role: 'system', content: `
-        You an Experienced Assistant, Kindly advise based on User profession which is ${occupation[0].Occupation}
+        You an Experienced Assistant Kindly advise based on User profession which is ${occupation[0].Occupation}
     `
             }];
         const history = yield (yield pool.request().input("UserId", userId).execute("GetUserRecords")).recordset;
@@ -111,7 +111,7 @@ function getChatResponse(message, userId) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-3.5-turbo',
+                model: 'gpt-4.1',
                 messages,
                 temperature: 0.9 //0-2
             })
