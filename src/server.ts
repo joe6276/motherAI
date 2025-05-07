@@ -20,9 +20,8 @@ app.use("/test", (req:Request, res:Response)=>{
 res.status(200).send("<h1> Hello There</h1>")
 })
 
+const port = process.env.PORT || 80 
 
-app.listen(80, ()=>{
-    console.log("App Running...");
-    
-})
+
+app.listen(port )
 
