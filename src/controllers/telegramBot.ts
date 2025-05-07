@@ -49,24 +49,24 @@ bot.on('message', async (msg) => {
             console.log("here" , session.temp?.email);
            const userRes = await getOccupation(session.temp?.email)
             
-        //    if (userRes[0].Department.toLowerCase()==="Finance".toLowerCase() ) {
-        //     const document = await getDocument(userRes[0].CompanyId);
-        //     console.log(document);
-        //     const botReply = await chatWithFinanceBot(document.DocumentURL, userMessage as string)
-        //     console.log(botReply);
+           if (userRes[0].Department.toLowerCase()==="Finance".toLowerCase() ) {
+            const document = await getDocument(userRes[0].CompanyId);
+            console.log(document);
+            const botReply = await chatWithFinanceBot(document.DocumentURL, userMessage as string)
+            console.log(botReply);
             
+            // const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
+            responseMessage = botReply;
+          
+        }else{
             const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
             responseMessage = botReply;
         }
-        // }else{
-        //     const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
-        //     responseMessage = botReply;
-        // }
            
 
             // Store conversation
             await insertToDB(userMessage as string, responseMessage, "Telegram", username);
-        // }
+        }
 
         // Send response
         await bot.sendMessage(chatId, responseMessage);

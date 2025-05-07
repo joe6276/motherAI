@@ -37,20 +37,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
-const AIRoutes_1 = __importDefault(require("./Routes/AIRoutes"));
 require("./controllers/telegramBot");
 const cors_1 = __importDefault(require("cors"));
-const companyRoutes_1 = __importDefault(require("./Routes/companyRoutes"));
-const userRoutes_1 = __importDefault(require("./Routes/userRoutes"));
-const blobRoutes_1 = __importDefault(require("./Routes/blobRoutes"));
 const app = (0, express_1.default)();
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, express_1.json)());
 app.use((0, cors_1.default)());
-app.use('/aiChat', AIRoutes_1.default);
-app.use("/users", userRoutes_1.default);
-app.use("/companies", companyRoutes_1.default);
-app.use("/file", blobRoutes_1.default);
+// app.use('/aiChat',router)
+// app.use("/users", userRouter)
+// app.use("/companies", companyRouter)
+// app.use("/file", uploadRouter)
 app.use("/test", (req, res) => {
     res.status(200).send("<h1> Hello There</h1>");
 });

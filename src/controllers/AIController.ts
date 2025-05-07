@@ -294,70 +294,70 @@ export async function getDocument(companyId:number){
 const loginSteps = new Map<string, { step: number, temp: any }>();
 
 export async function sendandReply(req: Request, res: Response) {
-    // const from = req.body.From;
-    // const to = req.body.To;
-    // const message = req.body.Body?.trim();
-    // const client = twilio(process.env.ACCOUNT_SID!, process.env.AUTH_TOKEN!);
+    const from = req.body.From;
+    const to = req.body.To;
+    const message = req.body.Body?.trim();
+    const client = twilio(process.env.ACCOUNT_SID!, process.env.AUTH_TOKEN!);
 
-    // let myemail='';
-    // let responseMessage = "";
+    let myemail='';
+    let responseMessage = "";
 
-    // try {
-    //     const session = loginSteps.get(from) || { step: 1, temp: {} };
+    try {
+        const session = loginSteps.get(from) || { step: 1, temp: {} };
 
-    //     if (session.step === 1) {
-    //         responseMessage = "Welcome! Please enter your email to log in.";
-    //         session.step = 2;
-    //         loginSteps.set(from, session);
-    //     } else if (session.step === 2) {
-    //         session.temp.email = message;
-    //         session.step = 3;
-    //         loginSteps.set(from, session);
-    //         responseMessage = "Thank you. Now, please enter your password.";
-    //     } else if (session.step === 3) {
-    //         const { email } = session.temp;
-    //         const password = message;
+        if (session.step === 1) {
+            responseMessage = "Welcome! Please enter your email to log in.";
+            session.step = 2;
+            loginSteps.set(from, session);
+        } else if (session.step === 2) {
+            session.temp.email = message;
+            session.step = 3;
+            loginSteps.set(from, session);
+            responseMessage = "Thank you. Now, please enter your password.";
+        } else if (session.step === 3) {
+            const { email } = session.temp;
+            const password = message;
 
-    //         const isLoginValid= await loginUserBot(email,password)
-    //         myemail=email
+            const isLoginValid= await loginUserBot(email,password)
+            myemail=email
             
-    //         if (isLoginValid) {
-    //             loginSteps.set(from, { step: 4, temp: { email } });
-    //             responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
-    //         } else {
-    //             loginSteps.delete(from);
-    //             responseMessage = "❌ Invalid credentials. Please start again by typing your email.";
-    //         }
-    //     } else {
-    //         // Step 4: Already authenticated
-    //         console.log("here" , session.temp?.email);
-    //         const userres = await getOccupation(session.temp?.email)
-    //         console.log(userres)
+            if (isLoginValid) {
+                loginSteps.set(from, { step: 4, temp: { email } });
+                responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
+            } else {
+                loginSteps.delete(from);
+                responseMessage = "❌ Invalid credentials. Please start again by typing your email.";
+            }
+        } else {
+            // Step 4: Already authenticated
+            console.log("here" , session.temp?.email);
+            const userres = await getOccupation(session.temp?.email)
+            console.log(userres)
 
-    //         let responseMessage=""
-    //             if(userres[0].Department.toLowerCase() === "Finance".toLowerCase()){
-    //                 const document = await getDocument(userres[0].CompanyId)
-    //                 responseMessage = await chatWithFinanceBot(document.DocumentURL, message)
+            let responseMessage=""
+                if(userres[0].Department.toLowerCase() === "Finance".toLowerCase()){
+                    const document = await getDocument(userres[0].CompanyId)
+                    responseMessage = await chatWithFinanceBot(document.DocumentURL, message)
               
-    //             }else{
-    //                 const response = await getChatResponse1(message, from,   userres[0].Occupation );
-    //                 responseMessage = response;
-    //             }
+                }else{
+                    const response = await getChatResponse1(message, from,   userres[0].Occupation );
+                    responseMessage = response;
+                }
 
-    //             console.log(responseMessage);
-    //     }
+                console.log(responseMessage);
+        }
 
-    //     await client.messages.create({
-    //         from: to,
-    //         to: from,
-    //         body: responseMessage
-    //     });
+        await client.messages.create({
+            from: to,
+            to: from,
+            body: responseMessage
+        });
 
-    //     await insertToDB(message, responseMessage, "Whatsapp", from);
-    //     console.log(`Replied to ${from}`);
-    // } catch (err) {
-    //     console.error("Error:", err);
-    // }
+        await insertToDB(message, responseMessage, "Whatsapp", from);
+        console.log(`Replied to ${from}`);
+    } catch (err) {
+        console.error("Error:", err);
+    }
 
     res.send("<Response></Response>");
 }

@@ -60,21 +60,21 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             yield bot.sendChatAction(chatId, 'typing');
             console.log("here", (_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
             const userRes = yield (0, AIController_1.getOccupation)((_d = session.temp) === null || _d === void 0 ? void 0 : _d.email);
-            //    if (userRes[0].Department.toLowerCase()==="Finance".toLowerCase() ) {
-            //     const document = await getDocument(userRes[0].CompanyId);
-            //     console.log(document);
-            //     const botReply = await chatWithFinanceBot(document.DocumentURL, userMessage as string)
-            //     console.log(botReply);
-            const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
-            responseMessage = botReply;
+            if (userRes[0].Department.toLowerCase() === "Finance".toLowerCase()) {
+                const document = yield (0, AIController_1.getDocument)(userRes[0].CompanyId);
+                console.log(document);
+                const botReply = yield (0, AIController_1.chatWithFinanceBot)(document.DocumentURL, userMessage);
+                console.log(botReply);
+                // const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
+                responseMessage = botReply;
+            }
+            else {
+                const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
+                responseMessage = botReply;
+            }
+            // Store conversation
+            yield (0, AIController_1.insertToDB)(userMessage, responseMessage, "Telegram", username);
         }
-        // }else{
-        //     const botReply = await getChatResponse2(userMessage as string ,userRes[0].Occupation );
-        //     responseMessage = botReply;
-        // }
-        // Store conversation
-        yield (0, AIController_1.insertToDB)(userMessage, responseMessage, "Telegram", username);
-        // }
         // Send response
         yield bot.sendMessage(chatId, responseMessage);
     }

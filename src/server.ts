@@ -11,10 +11,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(json())
 app.use(cors())
 
-app.use('/aiChat',router)
-app.use("/users", userRouter)
-app.use("/companies", companyRouter)
-app.use("/file", uploadRouter)
+// app.use('/aiChat',router)
+// app.use("/users", userRouter)
+// app.use("/companies", companyRouter)
+// app.use("/file", uploadRouter)
 
 app.use("/test", (req:Request, res:Response)=>{
 res.status(200).send("<h1> Hello There</h1>")
