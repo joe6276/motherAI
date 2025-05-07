@@ -1,6 +1,9 @@
 {
   "name": "motherai",
   "version": "1.0.0",
+  "engines": {
+    "node": "20"
+  },
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js"
