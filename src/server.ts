@@ -23,5 +23,8 @@ res.status(200).send("<h1> Hello There</h1>")
 const port = process.env.PORT || 80 
 
 
-app.listen(port )
+app.listen(port,()=>{
+    console.log("App Running..");
+    
+})
 

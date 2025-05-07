@@ -54,6 +54,7 @@ app.use("/file", blobRoutes_1.default);
 app.use("/test", (req, res) => {
     res.status(200).send("<h1> Hello There</h1>");
 });
-app.listen(80, () => {
-    console.log("App Running...");
+const port = process.env.PORT || 80;
+app.listen(port, () => {
+    console.log("App Running..");
 });
