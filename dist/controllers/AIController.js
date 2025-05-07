@@ -23,7 +23,6 @@ exports.loginUserBot = loginUserBot;
 exports.getOccupation = getOccupation;
 exports.getDocument = getDocument;
 exports.sendandReply = sendandReply;
-const twilio_1 = __importDefault(require("twilio"));
 const mssql_1 = __importDefault(require("mssql"));
 const Config_1 = require("../Config");
 const API_KEy = process.env.API_URL;
@@ -269,67 +268,60 @@ function getDocument(companyId) {
 const loginSteps = new Map();
 function sendandReply(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
-        const from = req.body.From;
-        const to = req.body.To;
-        const message = (_a = req.body.Body) === null || _a === void 0 ? void 0 : _a.trim();
-        const client = (0, twilio_1.default)(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
-        let myemail = '';
-        let responseMessage = "";
-        try {
-            const session = loginSteps.get(from) || { step: 1, temp: {} };
-            if (session.step === 1) {
-                responseMessage = "Welcome! Please enter your email to log in.";
-                session.step = 2;
-                loginSteps.set(from, session);
-            }
-            else if (session.step === 2) {
-                session.temp.email = message;
-                session.step = 3;
-                loginSteps.set(from, session);
-                responseMessage = "Thank you. Now, please enter your password.";
-            }
-            else if (session.step === 3) {
-                const { email } = session.temp;
-                const password = message;
-                const isLoginValid = yield loginUserBot(email, password);
-                myemail = email;
-                if (isLoginValid) {
-                    loginSteps.set(from, { step: 4, temp: { email } });
-                    responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
-                }
-                else {
-                    loginSteps.delete(from);
-                    responseMessage = "❌ Invalid credentials. Please start again by typing your email.";
-                }
-            }
-            else {
-                // Step 4: Already authenticated
-                console.log("here", (_b = session.temp) === null || _b === void 0 ? void 0 : _b.email);
-                const userres = yield getOccupation((_c = session.temp) === null || _c === void 0 ? void 0 : _c.email);
-                console.log(userres);
-                let responseMessage = "";
-                if (userres[0].Department.toLowerCase() === "Finance".toLowerCase()) {
-                    const document = yield getDocument(userres[0].CompanyId);
-                    responseMessage = yield chatWithFinanceBot(document.DocumentURL, message);
-                }
-                else {
-                    const response = yield getChatResponse1(message, from, userres[0].Occupation);
-                    responseMessage = response;
-                }
-                console.log(responseMessage);
-            }
-            yield client.messages.create({
-                from: to,
-                to: from,
-                body: responseMessage
-            });
-            yield insertToDB(message, responseMessage, "Whatsapp", from);
-            console.log(`Replied to ${from}`);
-        }
-        catch (err) {
-            console.error("Error:", err);
-        }
+        // const from = req.body.From;
+        // const to = req.body.To;
+        // const message = req.body.Body?.trim();
+        // const client = twilio(process.env.ACCOUNT_SID!, process.env.AUTH_TOKEN!);
+        // let myemail='';
+        // let responseMessage = "";
+        // try {
+        //     const session = loginSteps.get(from) || { step: 1, temp: {} };
+        //     if (session.step === 1) {
+        //         responseMessage = "Welcome! Please enter your email to log in.";
+        //         session.step = 2;
+        //         loginSteps.set(from, session);
+        //     } else if (session.step === 2) {
+        //         session.temp.email = message;
+        //         session.step = 3;
+        //         loginSteps.set(from, session);
+        //         responseMessage = "Thank you. Now, please enter your password.";
+        //     } else if (session.step === 3) {
+        //         const { email } = session.temp;
+        //         const password = message;
+        //         const isLoginValid= await loginUserBot(email,password)
+        //         myemail=email
+        //         if (isLoginValid) {
+        //             loginSteps.set(from, { step: 4, temp: { email } });
+        //             responseMessage = `✅ Login successful. Welcome ${email}! You can now chat with the bot.`;
+        //         } else {
+        //             loginSteps.delete(from);
+        //             responseMessage = "❌ Invalid credentials. Please start again by typing your email.";
+        //         }
+        //     } else {
+        //         // Step 4: Already authenticated
+        //         console.log("here" , session.temp?.email);
+        //         const userres = await getOccupation(session.temp?.email)
+        //         console.log(userres)
+        //         let responseMessage=""
+        //             if(userres[0].Department.toLowerCase() === "Finance".toLowerCase()){
+        //                 const document = await getDocument(userres[0].CompanyId)
+        //                 responseMessage = await chatWithFinanceBot(document.DocumentURL, message)
+        //             }else{
+        //                 const response = await getChatResponse1(message, from,   userres[0].Occupation );
+        //                 responseMessage = response;
+        //             }
+        //             console.log(responseMessage);
+        //     }
+        //     await client.messages.create({
+        //         from: to,
+        //         to: from,
+        //         body: responseMessage
+        //     });
+        //     await insertToDB(message, responseMessage, "Whatsapp", from);
+        //     console.log(`Replied to ${from}`);
+        // } catch (err) {
+        //     console.error("Error:", err);
+        // }
         res.send("<Response></Response>");
     });
 }

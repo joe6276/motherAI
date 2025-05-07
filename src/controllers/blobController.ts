@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { v4 as uuidv4 } from "uuid";
-import multer from "multer";
 import mssql from 'mssql'
 import { sqlConfig } from "../Config";
 
