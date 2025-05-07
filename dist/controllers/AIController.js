@@ -311,19 +311,13 @@ function sendandReply(req, res) {
                 let responseMessage = "";
                 if (userres[0].Department.toLowerCase() === "Finance".toLowerCase()) {
                     const document = yield getDocument(userres[0].CompanyId);
-                    responseMessage = yield chatWithFinanceBot(document.DocumentURL, message);
-                    console.log("Respones", responseMessage);
-                    yield client.messages.create({
-                        from: to,
-                        to: from,
-                        body: responseMessage
-                    });
+                    const res = yield chatWithFinanceBot(document.DocumentURL, message);
+                    responseMessage = res;
                 }
                 else {
                     const response = yield getChatResponse1(message, from, userres[0].Occupation);
                     responseMessage = response;
                 }
-                console.log(responseMessage);
             }
             yield client.messages.create({
                 from: to,
