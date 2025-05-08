@@ -70,6 +70,7 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
             }
             else {
                 const botReply = yield (0, AIController_1.getChatResponse2)(userMessage, userRes[0].Occupation);
+                console.log(botReply);
                 responseMessage = botReply;
             }
             // Store conversation
