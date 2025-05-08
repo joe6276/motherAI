@@ -65,7 +65,7 @@ bot.on('message', async (msg) => {
            
 
             // Store conversation
-            await insertToDB(userMessage as string, responseMessage, "Telegram", username);
+            // await insertToDB(userMessage as string, responseMessage, "Telegram", username);
         }
 
         // Send response

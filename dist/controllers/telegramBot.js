@@ -73,7 +73,7 @@ bot.on('message', (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 responseMessage = botReply;
             }
             // Store conversation
-            yield (0, AIController_1.insertToDB)(userMessage, responseMessage, "Telegram", username);
+            // await insertToDB(userMessage as string, responseMessage, "Telegram", username);
         }
         // Send response
         yield bot.sendMessage(chatId, responseMessage);
